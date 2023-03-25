@@ -32,11 +32,9 @@ let constructGuessesRegex = function({known, misplaced, counts}) {
 			knownArray[i] = known[i];
 	}
 	regex = knownArray.join("");
-	for (let i=0; i<misplaced.length; i++) {
-		for (let j=0; j<misplaced[i].length; j++) {
-			regex = regex.concat(`(?<=${misplaced[i][j]}.*)`);
-		}
-	}
+	Object.keys(counts).forEach((letter) => {
+		regex = regex.concat(`(?<={${letter}.*}${counts[letter]})`);
+	});
 	return regex;
 };
 
@@ -52,13 +50,15 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 		}
 	}
 	regex = knownArray.join("");
-	for (let i=0; i<misplaced.length; i++) {
-		for (let j=0; j<misplaced[i].length; j++) {
-			regex = regex.concat(`(?<=${misplaced[i][j]}.*)`);
+	Object.keys(counts).forEach((letter) => {
+		regex = regex.concat(`(?<={${letter}.*}${counts[letter]})`);
+		if (missing.includes(letter)) {
+			regex = regex.concat(`(?<={^${letter}.*}${counts[letter]})`);
 		}
-	}
+	});
 	if (missing.length > 0 ) {
-		regex = regex.concat(`(?<!([${[...new Set(missing.sort())].join("")}].*))`);
+		let filtered = missing.filter((x)=>{return !counts[x]});
+		regex = regex.concat(`(?<!([${[...new Set(filtered.sort())].join("")}].*))`);
 	}
 	return regex;
 };
