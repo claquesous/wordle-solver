@@ -16,6 +16,7 @@ let root = {
 	known: [],
 	misplaced: [[],[],[],[],[]],
 	missing: [],
+	counts: {},
 	parentNode: null,
 	guesses: 0,
 	guessOutcomes: [],
@@ -23,7 +24,7 @@ let root = {
 
 queue.push(root);
 
-let constructGuessesRegex = function({known, misplaced}) {
+let constructGuessesRegex = function({known, misplaced, counts}) {
 	let knownArray = [".",".",".",".","."];
 	let regex;
 	for (let i=0; i<5; i++) {
@@ -39,7 +40,7 @@ let constructGuessesRegex = function({known, misplaced}) {
 	return regex;
 };
 
-let constructAnswersRegex = function({known, misplaced, missing}) {
+let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	let knownArray = [".",".",".",".","."];
 	let regex;
 	for (let i=0; i<5; i++) {
@@ -62,10 +63,10 @@ let constructAnswersRegex = function({known, misplaced, missing}) {
 	return regex;
 };
 
-let validOutcome = function({known, misplaced, missing}) {
+let validOutcome = function({known, misplaced, missing, counts}) {
 	const knownCount = known.filter((x) => {return !!x}).length;
 	const minimumMisplacedCount = new Set(misplaced.reduce((arr,x) => {return arr.concat(x)}, [])).size;
-	if (minimumMisplacedCount + knownCount > 5) {
+	if (Object.keys(counts).reduce((sum,x) => {return sum+x;}, 0)>5 ) {
 //		console.log("too many", known, misplaced);
 		return false;
 	}
@@ -78,14 +79,15 @@ let validOutcome = function({known, misplaced, missing}) {
 	return true;
 }
 
-let enumerateOutcomes = function(word, {known, misplaced, missing}) {
+let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 	let outcomes = [];
 	for (let i=0; i<243; i++) {
 		let valid = true;
 		let node = {
-			known: [...known],
-			misplaced: misplaced.map((x) => { return [...x]}),
-			missing: [...missing],
+			known: [],
+			misplaced: [[],[],[],[],[]],
+			missing: [],
+			counts: {},
 		};
 		for (let j=0; j<5; j++) {
 			let outcome = (Math.floor(i/(3**j)))%3;
@@ -94,17 +96,52 @@ let enumerateOutcomes = function(word, {known, misplaced, missing}) {
 				case 0:
 					node.known[j] = letter;
 					node.misplaced[j] = [];
+					node.counts[letter] = !!node.counts[letter] ? node.counts[letter]+1 : 1;
+					if (node.known[j] !== known[j]){
+						valid = false;
+					}
 					break;
 				case 1:
 					node.misplaced[j].push(letter);
+					node.counts[letter] = !!node.counts[letter] ? node.counts[letter]+1 : 1;
+					if (!!known[j]) {
+						valid = false;
+					}
 					break;
 				case 2:
 					node.missing.push(letter);
+					if (!!known[j]) {
+						valid = false;
+					}
 					break;
 			}
 		}
-		node.missing = [...new Set(node.missing)];
-		outcomes.push(node);
+		Object.keys(counts).forEach((letter) => {
+			let count = 0;
+			for (let j=0; j<5; j++) {
+				if (node.known[j]===letter || node.misplaced[j].includes(letter)) {
+					count++;
+				}
+			}
+			if (count < counts[letter]){
+				valid = false;
+			}
+		});
+		if (valid) {
+			for (let j=0; j<5; j++) {
+				if (node.known[j] || known[j]) {
+					node.known[j] = node.known[j] || known[j];
+				}
+				node.misplaced[j] = [...new Set(node.misplaced[j].concat(misplaced[j]).sort())]; 
+			}
+			node.missing = [...new Set(node.missing.concat(missing).sort())];
+			Object.keys(counts).forEach((letter) => {
+				if (!!node.counts[letter] || node.counts[letter] < counts[letter]) {
+					node.counts[letter] = counts[letter];
+				}
+			});
+			outcomes.push(node);
+		}
 	}
 	return outcomes.filter(validOutcome);
 }
@@ -123,12 +160,13 @@ let processNode = function(node) {
 		for (let j=0; j<outcomes.length; j++) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
 			let guessRegex = constructGuessesRegex(outcomes[j]);
-//			console.log(outcomes[j], answerRegex, guessRegex);
 			let validGuesses = guessesCache[guessRegex] ||= guesses.filter((w) => { return !!w.match(new RegExp(guessRegex))});
 			if (validGuesses.length <1)
 				continue;
-	//		console.log(answerRegex, guessRegex);
 			let validAnswers = answersCache[answerRegex] ||= answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
+			if (node.guesses === 5){
+				console.log(outcomes[j], answerRegex, validAnswers);
+			}
 			node.guessOutcomes.push({
 				guess,
 				validGuesses,
