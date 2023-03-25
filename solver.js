@@ -26,7 +26,7 @@ queue.push(root);
 let constructGuessesRegex = function({known, misplaced}) {
 	let knownArray = [".",".",".",".","."];
 	let regex;
-	for (let i=0; i<known.length; i++) {
+	for (let i=0; i<5; i++) {
 		if (!!known[i])
 			knownArray[i] = known[i];
 	}
