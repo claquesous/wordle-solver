@@ -33,7 +33,7 @@ let constructGuessesRegex = function({known, misplaced, counts}) {
 	}
 	regex = knownArray.join("");
 	Object.keys(counts).forEach((letter) => {
-		regex = regex.concat(`(?<={${letter}.*}${counts[letter]})`);
+		regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
 	});
 	return regex;
 };
@@ -51,9 +51,9 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	}
 	regex = knownArray.join("");
 	Object.keys(counts).forEach((letter) => {
-		regex = regex.concat(`(?<={${letter}.*}${counts[letter]})`);
+		regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
 		if (missing.includes(letter)) {
-			regex = regex.concat(`(?<={^${letter}.*}${counts[letter]})`);
+			regex = regex.concat(`(?<=(^${letter}.*){${counts[letter]}})`);
 		}
 	});
 	if (missing.length > 0 ) {
@@ -67,12 +67,12 @@ let validOutcome = function({known, misplaced, missing, counts}) {
 	const knownCount = known.filter((x) => {return !!x}).length;
 	const minimumMisplacedCount = new Set(misplaced.reduce((arr,x) => {return arr.concat(x)}, [])).size;
 	if (Object.keys(counts).reduce((sum,x) => {return sum+x;}, 0)>5 ) {
-//		console.log("too many", known, misplaced);
+		console.log("too many", known, misplaced);
 		return false;
 	}
 	for (let i=0; i<5; i++) {
 		if (!!known[i] && misplaced[i].includes(known[i])) {
-//			console.log("same character right position and wrong", i, known, misplaced);
+			console.log("same character right position and wrong", i, known, misplaced);
 			return false;
 		}
 	}
@@ -97,7 +97,8 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 					node.known[j] = letter;
 					node.misplaced[j] = [];
 					node.counts[letter] = !!node.counts[letter] ? node.counts[letter]+1 : 1;
-					if (node.known[j] !== known[j]){
+					if (!!known[j] && node.known[j] !== known[j]){
+						console.log("invalid known", j, node.known[j], known[j]);
 						valid = false;
 					}
 					break;
@@ -105,12 +106,14 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 					node.misplaced[j].push(letter);
 					node.counts[letter] = !!node.counts[letter] ? node.counts[letter]+1 : 1;
 					if (!!known[j]) {
+						console.log("invalid misplaced", j, known[j]);
 						valid = false;
 					}
 					break;
 				case 2:
 					node.missing.push(letter);
 					if (!!known[j]) {
+						console.log("invalid missing", j, known[j]);
 						valid = false;
 					}
 					break;
@@ -125,6 +128,7 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 			}
 			if (count < counts[letter]){
 				valid = false;
+				console.log("invalid counts", count, counts[letter]);
 			}
 		});
 		if (valid) {
@@ -150,19 +154,25 @@ let processNode = function(node) {
 	if (node.guesses === 6 || node.validAnswers.length === 0) {
 		return;
 	}
-	for (let i=0; i<node.validGuesses.length/1000; i++) {
+	for (let i=0; i<node.validGuesses.length; i++) {
 		let guess = node.validGuesses[i];
 		if (node.guesses===0)
 			guess = "chump";
-		console.log(node.guesses, guess);
+		console.log(node.guesses, guess, node.validGuesses.length);
 		let outcomes = enumerateOutcomes(guess, node);
 		let answerOutcomes = [];
+		if (node.guesses===5)
+			console.log("outcomes", outcomes.length, outcomes);
 		for (let j=0; j<outcomes.length; j++) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
 			let guessRegex = constructGuessesRegex(outcomes[j]);
 			let validGuesses = guessesCache[guessRegex] ||= guesses.filter((w) => { return !!w.match(new RegExp(guessRegex))});
-			if (validGuesses.length <1)
+			if (validGuesses.length <1){
+				if (node.guesses===5) {
+					console.log("no valid guesses", guessRegex, guesses, outcomes[j]);
+				}
 				continue;
+			}
 			let validAnswers = answersCache[answerRegex] ||= answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
 			if (node.guesses === 5){
 				console.log(outcomes[j], answerRegex, validAnswers);
@@ -190,7 +200,7 @@ let processNode = function(node) {
 			}
 			exit(2);
 		}
-		if (node.guesses ===0)
+		if (node.guesses ===i && i!==5)
 			break;
 	}
 	queue.push(...node.guessOutcomes);
@@ -217,18 +227,3 @@ console.log("done");
 // Note that without conditions are restrictions on answers, but not on guesses.
 // It is conceivable a word that isn't a valid answer is the best guess.
 
-/*
-let tritree = [{},{},{},{},{}];
-
-for (let i=0; i<5; i++){
-    words.forEach(w => {
-        key = w.substring(0,i) + "_" + w.substring(i+1);
-        if (!tritree[i][key]) tritree[i][key] = [];
-        tritree[i][key] = tritree[i][key].concat(w[i]);
-    })
-    Object.keys(tritree[i]).forEach(key => {if(tritree[i][key].length > 3) console.log(key,tritree[i][key])});
-}
-
-
-console.log(tritree);
-*/
