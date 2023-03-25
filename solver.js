@@ -131,6 +131,12 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 				console.log("invalid counts", count, counts[letter]);
 			}
 		});
+		Object.keys(node.counts).forEach((letter) => {
+			if ((!counts[letter] || (node.counts[letter] > counts[letter])) && missing.includes(letter)) {
+				valid = false;
+				console.log("invalid count was missing", letter, node.counts, counts, missing);
+			}
+		});
 		if (valid) {
 			for (let j=0; j<5; j++) {
 				if (node.known[j] || known[j]) {
