@@ -167,7 +167,13 @@ let guessed = function(node) {
 }
 
 let processNode = function(node) {
-	if (node.guesses === 6 || node.validAnswers.length === 0) {
+	if (node.guesses === 6 || node.validAnswers.length < 2) {
+		if (node.validAnswers.length === 1) {
+			node.result = true;
+		}
+		else {
+			node.result = false;
+		}
 		return;
 	}
 	for (let i=0; i<node.validGuesses.length; i++) {
@@ -204,7 +210,7 @@ let processNode = function(node) {
 			answerOutcomes.push(...validAnswers);
 		}
 		console.log(node.guesses+1, guess, guessed(node).join(", "), node.validGuesses.length, new Set(node.validAnswers).size);
-		if (new Set(answerOutcomes).size !== new Set(node.validAnswers).size && node.guesses === 5) {
+		if (new Set(answerOutcomes).size !== new Set(node.validAnswers).size) {
 			console.log("answers don't match (previous answers, new outcomes set)", guess, new Set(node.validAnswers).size, new Set(answerOutcomes).size, new Set(node.validAnswers), new Set(answerOutcomes.sort()));
 			let iterator = node;
 			while (iterator.guesses !==0) {
