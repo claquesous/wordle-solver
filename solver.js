@@ -195,6 +195,10 @@ let processNode = function(node) {
 				continue;
 			}
 			let validAnswers = answersCache[answerRegex] ||= answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
+			if (!!node.parentNode && answerRegex == node.parentNode.validAnswersRegex) {
+				console.log("unhelpful outcome", guess, outcomes[j], answerRegex, validGuessRegex);
+				continue;
+			}
 			if (node.guesses === 5){
 				if (DEBUG) console.log(outcomes[j], answerRegex, validAnswers);
 			}
