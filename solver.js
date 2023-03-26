@@ -54,7 +54,7 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	Object.keys(counts).forEach((letter) => {
 		regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
 		if (missing.includes(letter)) {
-			regex = regex.concat(`(?<=([^${letter}].*){${counts[letter]}})`);
+			regex = regex.concat(`(?<=([^${letter}].*){${5-counts[letter]}})`);
 		}
 	});
 	if (missing.length > 0 ) {
