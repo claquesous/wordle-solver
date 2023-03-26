@@ -1,4 +1,5 @@
 const fs = require("fs");
+const DEBUG = false;
 
 let guesses = fs.readFileSync("words.txt", "utf8").split("\n");
 guesses.pop();
@@ -53,7 +54,7 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	Object.keys(counts).forEach((letter) => {
 		regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
 		if (missing.includes(letter)) {
-			regex = regex.concat(`(?<=(^${letter}.*){${counts[letter]}})`);
+			regex = regex.concat(`(?<=([^${letter}].*){${counts[letter]}})`);
 		}
 	});
 	if (missing.length > 0 ) {
@@ -66,13 +67,13 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 let validOutcome = function({known, misplaced, missing, counts}) {
 	const knownCount = known.filter((x) => {return !!x}).length;
 	const minimumMisplacedCount = new Set(misplaced.reduce((arr,x) => {return arr.concat(x)}, [])).size;
-	if (Object.keys(counts).reduce((sum,x) => {return sum+x;}, 0)>5 ) {
-		console.log("too many", known, misplaced);
+	if (Object.keys(counts).reduce((sum,letter) => {return sum+counts[letter];}, 0)>5 ) {
+		if (DEBUG) console.log("too many", known, misplaced);
 		return false;
 	}
 	for (let i=0; i<5; i++) {
 		if (!!known[i] && misplaced[i].includes(known[i])) {
-			console.log("same character right position and wrong", i, known, misplaced);
+			if (DEBUG) console.log("same character right position and wrong", i, known, misplaced);
 			return false;
 		}
 	}
@@ -96,24 +97,24 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 				case 0:
 					node.known[j] = letter;
 					node.misplaced[j] = [];
-					node.counts[letter] = !!node.counts[letter] ? node.counts[letter]+1 : 1;
+					node.counts[letter] = !node.counts[letter] ? 1 : node.counts[letter]+1;
 					if (!!known[j] && node.known[j] !== known[j]){
-						console.log("invalid known", j, node.known[j], known[j]);
+						if (DEBUG) console.log("invalid known", j, node.known[j], known[j]);
 						valid = false;
 					}
 					break;
 				case 1:
 					node.misplaced[j].push(letter);
-					node.counts[letter] = !!node.counts[letter] ? node.counts[letter]+1 : 1;
+					node.counts[letter] = !node.counts[letter] ? 1 : node.counts[letter]+1;
 					if (!!known[j]) {
-						console.log("invalid misplaced", j, known[j]);
+						if (DEBUG) console.log("invalid misplaced", j, known[j]);
 						valid = false;
 					}
 					break;
 				case 2:
 					node.missing.push(letter);
 					if (!!known[j]) {
-						console.log("invalid missing", j, known[j]);
+						if (DEBUG) console.log("invalid missing", j, known[j]);
 						valid = false;
 					}
 					break;
@@ -128,13 +129,13 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 			}
 			if (count < counts[letter]){
 				valid = false;
-				console.log("invalid counts", count, counts[letter]);
+				if (DEBUG) console.log("invalid counts", count, counts[letter]);
 			}
 		});
 		Object.keys(node.counts).forEach((letter) => {
 			if ((!counts[letter] || (node.counts[letter] > counts[letter])) && missing.includes(letter)) {
 				valid = false;
-				console.log("invalid count was missing", letter, node.counts, counts, missing);
+				if (DEBUG) console.log("invalid count was missing", letter, node.counts, counts, missing);
 			}
 		});
 		if (valid) {
@@ -146,7 +147,7 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 			}
 			node.missing = [...new Set(node.missing.concat(missing).sort())];
 			Object.keys(counts).forEach((letter) => {
-				if (!!node.counts[letter] || node.counts[letter] < counts[letter]) {
+				if (!node.counts[letter] || node.counts[letter] < counts[letter]) {
 					node.counts[letter] = counts[letter];
 				}
 			});
@@ -168,7 +169,7 @@ let processNode = function(node) {
 		let outcomes = enumerateOutcomes(guess, node);
 		let answerOutcomes = [];
 		if (node.guesses===5)
-			console.log("outcomes", outcomes.length, outcomes);
+			if (DEBUG) console.log("outcomes", outcomes.length, outcomes);
 		for (let j=0; j<outcomes.length; j++) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
 			let guessRegex = constructGuessesRegex(outcomes[j]);
@@ -181,7 +182,7 @@ let processNode = function(node) {
 			}
 			let validAnswers = answersCache[answerRegex] ||= answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
 			if (node.guesses === 5){
-				console.log(outcomes[j], answerRegex, validAnswers);
+				if (DEBUG) console.log(outcomes[j], answerRegex, validAnswers);
 			}
 			node.guessOutcomes.push({
 				guess,
@@ -195,7 +196,7 @@ let processNode = function(node) {
 			answerOutcomes.push(...validAnswers);
 		}
 		if (new Set(answerOutcomes).size !== new Set(node.validAnswers).size && node.guesses === 5) {
-			console.log("answers don't match", new Set(node.validAnswers).size, new Set(answerOutcomes).size, new Set(answerOutcomes).has(guess), new Set(node.validAnswers), new Set(answerOutcomes.sort()));
+			console.log("answers don't match (previous answers, new outcomes set)", guess, new Set(node.validAnswers).size, new Set(answerOutcomes).size, new Set(node.validAnswers), new Set(answerOutcomes.sort()));
 			let iterator = node;
 			while (iterator.guesses !==0) {
 				let {guessOutcomes, parentNode, ...loggable} = iterator;
