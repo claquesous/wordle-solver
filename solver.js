@@ -157,6 +157,15 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 	return outcomes.filter(validOutcome);
 }
 
+let guessed = function(node) {
+	let guesses=[];
+	do {
+		guesses.push(node.guess);
+		node=node.parentNode;
+	} while (!!node);
+	return guesses;
+}
+
 let processNode = function(node) {
 	if (node.guesses === 6 || node.validAnswers.length === 0) {
 		return;
@@ -165,7 +174,6 @@ let processNode = function(node) {
 		let guess = node.validGuesses[i];
 		if (node.guesses===0)
 			guess = "chump";
-		console.log(node.guesses, guess, node.validGuesses.length);
 		let outcomes = enumerateOutcomes(guess, node);
 		let answerOutcomes = [];
 		if (node.guesses===5)
@@ -195,6 +203,7 @@ let processNode = function(node) {
 			});
 			answerOutcomes.push(...validAnswers);
 		}
+		console.log(node.guesses+1, guess, guessed(node).join(", "), node.validGuesses.length, new Set(node.validAnswers).size);
 		if (new Set(answerOutcomes).size !== new Set(node.validAnswers).size && node.guesses === 5) {
 			console.log("answers don't match (previous answers, new outcomes set)", guess, new Set(node.validAnswers).size, new Set(answerOutcomes).size, new Set(node.validAnswers), new Set(answerOutcomes.sort()));
 			let iterator = node;
