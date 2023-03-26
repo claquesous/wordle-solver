@@ -8,12 +8,12 @@ answers.pop();
 
 let queue = [];
 
-let answersCache = {};
-let guessesCache = {};
+let answersCache = {".....": answers};
+let guessesCache = {".....": guesses};
 
 let root = {
-	validGuesses: guesses,
-	validAnswers: answers,
+	validGuessesRegex: ".....",
+	validAnswersRegex: ".....",
 	known: [],
 	misplaced: [[],[],[],[],[]],
 	missing: [],
@@ -167,8 +167,8 @@ let guessed = function(node) {
 }
 
 let processNode = function(node) {
-	if (node.guesses === 6 || node.validAnswers.length < 2) {
-		if (node.validAnswers.length === 1) {
+	if (node.guesses === 6 || answersCache[node.validAnswersRegex].length < 2) {
+		if (answersCache[node.validAnswersRegex].length === 1) {
 			node.result = true;
 		}
 		else {
@@ -176,8 +176,8 @@ let processNode = function(node) {
 		}
 		return;
 	}
-	for (let i=0; i<node.validGuesses.length; i++) {
-		let guess = node.validGuesses[i];
+	for (let i=0; i<guessesCache[node.validGuessesRegex].length; i++) {
+		let guess = guessesCache[node.validGuessesRegex][i];
 		if (node.guesses===0)
 			guess = "chump";
 		let outcomes = enumerateOutcomes(guess, node);
@@ -200,8 +200,8 @@ let processNode = function(node) {
 			}
 			node.guessOutcomes.push({
 				guess,
-				validGuesses,
-				validAnswers,
+				validGuessesRegex: guessRegex,
+				validAnswersRegex: answerRegex,
 				...outcomes[j],
 				parentNode: node,
 				guesses: node.guesses+1,
@@ -209,9 +209,9 @@ let processNode = function(node) {
 			});
 			answerOutcomes.push(...validAnswers);
 		}
-		console.log(node.guesses+1, guess, guessed(node).join(", "), node.validGuesses.length, new Set(node.validAnswers).size);
-		if (new Set(answerOutcomes).size !== new Set(node.validAnswers).size) {
-			console.log("answers don't match (previous answers, new outcomes set)", guess, new Set(node.validAnswers).size, new Set(answerOutcomes).size, new Set(node.validAnswers), new Set(answerOutcomes.sort()));
+		console.log(node.guesses+1, guess, guessed(node).join(", "), guessesCache[node.validGuessesRegex].length, new Set(answersCache[node.validAnswersRegex]).size);
+		if (new Set(answerOutcomes).size !== new Set(answersCache[node.validAnswersRegex]).size) {
+			console.log("answers don't match (previous answers, new outcomes set)", guess, new Set(answersCache[node.validAnswersRegex]).size, new Set(answerOutcomes).size, new Set(answersCache[node.validAnswersRegex]), new Set(answerOutcomes.sort()));
 			let iterator = node;
 			while (iterator.guesses !==0) {
 				let {guessOutcomes, parentNode, ...loggable} = iterator;
