@@ -20,7 +20,7 @@ let root = {
 	counts: {},
 	parentNode: null,
 	guesses: 0,
-	guessOutcomes: [],
+	guessOutcomes: {},
 };
 
 queue.push(root);
@@ -157,20 +157,20 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 	return outcomes.filter(validOutcome);
 }
 
-let pruneNodes = function(node) {
+let pruneGuess = function(node, guess) {
 	console.log("pruning");
 	if (!!node)
 		return;
 	let complete = true;
 	let answerSet = new Set();
-	for (let i=0; i<node.guessOutcomes.length; i++) {
-		let outcome = node.guessOutcomes[i];
+	for (let i=0; i<node.guessOutcomes[guess].length; i++) {
+		let outcome = node.guessOutcomes[guess][i];
 		if (outcome.result === true) {
 //			answerSet = new Set([...answerSet, ...answersCache[outcome.validAnswersRegex]);
 		}
 		else if (outcome.result === false) {
 			console.log("failed!", node.guesses);
-		//	node.guessOutcomes.splice(i--, 1);
+		//	node.guessOutcomes[guess].splice(i--, 1);
 		}
 		else {
 			complete = false;
@@ -179,7 +179,7 @@ let pruneNodes = function(node) {
 	if (complete) {
 		console.log("complete subtree!");
 		node.result = (answerSet.size === answersCache[node.validAnswersRegex].length);
-		pruneNodes(node.parentNode);
+//		pruneGuess(node.parentNode);
 	}
 }
 
@@ -196,23 +196,24 @@ let processNode = function(node) {
 	if (node.guesses === 6 || answersCache[node.validAnswersRegex].length < 2) {
 		return;
 	}
-/*
+
 	if (answersCache[node.validAnswersRegex].length <= (6-node.guesses)) {
-//		console.log("winner!", node.guesses, answersCache[node.validAnswersRegex].length);
+		console.log("winner!", node.guesses, answersCache[node.validAnswersRegex].length);
 		node.result = true;
-//		pruneNodes(node.parentNode);
+//		pruneGuess(node.parentNode, node.guess);
 		return;
 	}
 	if (node.guesses === 5) {
-//		console.log("out of guesses");
+		console.log("out of guesses");
 		node.result = false;
-//		pruneNodes(node.parentNode);
-		return;
-	}*/
+//		pruneGuess(node.parentNode, node.guess);
+//		return;
+	}
 	for (let i=0; i<guessesCache[node.validGuessesRegex].length; i++) {
 		let guess = guessesCache[node.validGuessesRegex][i];
 		if (node.guesses===0)
 			guess = "chump";
+		node.guessOutcomes[guess] = [];
 		let outcomes = enumerateOutcomes(guess, node);
 		let answerOutcomes = [];
 		if (node.guesses===5)
@@ -235,14 +236,14 @@ let processNode = function(node) {
 			if (node.guesses === 5){
 				if (DEBUG) console.log(outcomes[j], answerRegex, validAnswers);
 			}
-			node.guessOutcomes.push({
+			node.guessOutcomes[guess].push({
 				guess,
 				validGuessesRegex: guessRegex,
 				validAnswersRegex: answerRegex,
 				...outcomes[j],
 				parentNode: node,
 				guesses: node.guesses+1,
-				guessOutcomes: [],
+				guessOutcomes: {},
 			});
 			answerOutcomes.push(...validAnswers);
 		}
@@ -262,7 +263,7 @@ let processNode = function(node) {
 		if (node.guesses ===i && i!==5)
 			break;
 	}
-	queue.push(...node.guessOutcomes);
+	queue.push(...Object.values(node.guessOutcomes).flat());
 }
 
 while (queue.length > 0) {
