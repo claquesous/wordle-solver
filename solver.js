@@ -157,6 +157,32 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 	return outcomes.filter(validOutcome);
 }
 
+let pruneNodes = function(node) {
+	console.log("pruning");
+	if (!!node)
+		return;
+	let complete = true;
+	let answerSet = new Set();
+	for (let i=0; i<node.guessOutcomes.length; i++) {
+		let outcome = node.guessOutcomes[i];
+		if (outcome.result === true) {
+//			answerSet = new Set([...answerSet, ...answersCache[outcome.validAnswersRegex]);
+		}
+		else if (outcome.result === false) {
+			console.log("failed!", node.guesses);
+		//	node.guessOutcomes.splice(i--, 1);
+		}
+		else {
+			complete = false;
+		}
+	}
+	if (complete) {
+		console.log("complete subtree!");
+		node.result = (answerSet.size === answersCache[node.validAnswersRegex].length);
+		pruneNodes(node.parentNode);
+	}
+}
+
 let guessed = function(node) {
 	let guesses=[];
 	do {
@@ -168,14 +194,21 @@ let guessed = function(node) {
 
 let processNode = function(node) {
 	if (node.guesses === 6 || answersCache[node.validAnswersRegex].length < 2) {
-		if (answersCache[node.validAnswersRegex].length === 1) {
-			node.result = true;
-		}
-		else {
-			node.result = false;
-		}
 		return;
 	}
+/*
+	if (answersCache[node.validAnswersRegex].length <= (6-node.guesses)) {
+//		console.log("winner!", node.guesses, answersCache[node.validAnswersRegex].length);
+		node.result = true;
+//		pruneNodes(node.parentNode);
+		return;
+	}
+	if (node.guesses === 5) {
+//		console.log("out of guesses");
+		node.result = false;
+//		pruneNodes(node.parentNode);
+		return;
+	}*/
 	for (let i=0; i<guessesCache[node.validGuessesRegex].length; i++) {
 		let guess = guessesCache[node.validGuessesRegex][i];
 		if (node.guesses===0)
@@ -188,15 +221,15 @@ let processNode = function(node) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
 			let guessRegex = constructGuessesRegex(outcomes[j]);
 			let validGuesses = guessesCache[guessRegex] ||= guesses.filter((w) => { return !!w.match(new RegExp(guessRegex))});
-			if (validGuesses.length <1){
+			let validAnswers = answersCache[answerRegex] ||= answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
+			if (validAnswers.length === 0){
 				if (node.guesses===5) {
-					console.log("no valid guesses", guessRegex, guesses, outcomes[j]);
+					if (DEBUG) console.log("no valid answers", guessRegex, guesses, outcomes[j]);
 				}
 				continue;
 			}
-			let validAnswers = answersCache[answerRegex] ||= answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
 			if (!!node.parentNode && answerRegex == node.parentNode.validAnswersRegex) {
-				console.log("unhelpful outcome", guess, outcomes[j], answerRegex, validGuessRegex);
+				console.log("unhelpful outcome", guess, outcomes[j], answerRegex, guessRegex);
 				continue;
 			}
 			if (node.guesses === 5){
