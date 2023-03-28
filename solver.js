@@ -185,10 +185,10 @@ let pruneGuess = function(node, guess) {
 
 let guessed = function(node) {
 	let guesses=[];
-	do {
+	while (!!node.guess) {
 		guesses.push(node.guess);
 		node=node.parentNode;
-	} while (!!node);
+	}
 	return guesses;
 }
 
