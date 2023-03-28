@@ -210,10 +210,15 @@ let processNode = function(node) {
 		if (node.guesses===0)
 			guess = "chump";
 		node.guessOutcomes[guess] = [];
+		if (guessed(node).includes(guess))
+			continue;
 		let outcomes = enumerateOutcomes(guess, node);
 		let answerOutcomes = [];
 		if (node.guesses===4)
 			if (DEBUG) console.log("outcomes", outcomes.length, outcomes);
+		if (outcomes.length===0) {
+			continue;
+		}
 		for (let j=0; j<outcomes.length; j++) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
 			let guessRegex = constructGuessesRegex(outcomes[j]);
@@ -228,6 +233,8 @@ let processNode = function(node) {
 			if (!!node.parentNode && answerRegex == node.parentNode.validAnswersRegex) {
 				console.log("unhelpful outcome", guess, outcomes[j], answerRegex, guessRegex);
 				continue;
+			} else if (!!node.parentNode) {
+				if (DEBUG) console.log("helpful", answerRegex, node.parentNode.validAnswersRegex);
 			}
 			if (node.guesses === 4){
 				if (DEBUG) console.log(outcomes[j], answerRegex, validAnswers);
