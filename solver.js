@@ -193,10 +193,6 @@ let guessed = function(node) {
 }
 
 let processNode = function(node) {
-	if (node.guesses === 6 || answersCache[node.validAnswersRegex].length < 2) {
-		return;
-	}
-
 	if (answersCache[node.validAnswersRegex].length <= (6-node.guesses)) {
 		console.log("winner!", node.guesses, answersCache[node.validAnswersRegex].length);
 		node.result = true;
@@ -207,7 +203,7 @@ let processNode = function(node) {
 		console.log("out of guesses");
 		node.result = false;
 //		pruneGuess(node.parentNode, node.guess);
-//		return;
+		return;
 	}
 	for (let i=0; i<guessesCache[node.validGuessesRegex].length; i++) {
 		let guess = guessesCache[node.validGuessesRegex][i];
@@ -216,7 +212,7 @@ let processNode = function(node) {
 		node.guessOutcomes[guess] = [];
 		let outcomes = enumerateOutcomes(guess, node);
 		let answerOutcomes = [];
-		if (node.guesses===5)
+		if (node.guesses===4)
 			if (DEBUG) console.log("outcomes", outcomes.length, outcomes);
 		for (let j=0; j<outcomes.length; j++) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
@@ -224,7 +220,7 @@ let processNode = function(node) {
 			let validGuesses = guessesCache[guessRegex] ||= guesses.filter((w) => { return !!w.match(new RegExp(guessRegex))});
 			let validAnswers = answersCache[answerRegex] ||= answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
 			if (validAnswers.length === 0){
-				if (node.guesses===5) {
+				if (node.guesses===4) {
 					if (DEBUG) console.log("no valid answers", guessRegex, guesses, outcomes[j]);
 				}
 				continue;
@@ -233,7 +229,7 @@ let processNode = function(node) {
 				console.log("unhelpful outcome", guess, outcomes[j], answerRegex, guessRegex);
 				continue;
 			}
-			if (node.guesses === 5){
+			if (node.guesses === 4){
 				if (DEBUG) console.log(outcomes[j], answerRegex, validAnswers);
 			}
 			node.guessOutcomes[guess].push({
@@ -260,7 +256,7 @@ let processNode = function(node) {
 			}
 			exit(2);
 		}
-		if (node.guesses ===i && i!==5)
+		if (node.guesses ===i && i!==4)
 			break;
 	}
 	queue.push(...Object.values(node.guessOutcomes).flat());
