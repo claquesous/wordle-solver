@@ -925,6 +925,7 @@ grown
 gruel
 gruff
 grunt
+guano
 guard
 guava
 guess
