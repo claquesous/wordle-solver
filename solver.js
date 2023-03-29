@@ -158,28 +158,43 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 }
 
 let pruneGuess = function(node, guess) {
-	console.log("pruning");
-	if (!!node)
+	if (!node)
 		return;
 	let complete = true;
 	let answerSet = new Set();
+	let incomplete = 0;
 	for (let i=0; i<node.guessOutcomes[guess].length; i++) {
 		let outcome = node.guessOutcomes[guess][i];
 		if (outcome.result === true) {
-//			answerSet = new Set([...answerSet, ...answersCache[outcome.validAnswersRegex]);
+			let oldSize = answerSet.size;
+			answerSet = new Set([...answerSet, ...answersCache[outcome.validAnswersRegex]]);
+			console.log("prune: winner adding", guess, oldSize, answerSet.size);
 		}
 		else if (outcome.result === false) {
-			console.log("failed!", node.guesses);
-		//	node.guessOutcomes[guess].splice(i--, 1);
+			console.log("prune failed node!", node.guesses);
+			node.guessOutcomes[guess].splice(i--, 1);
 		}
 		else {
 			complete = false;
+			incomplete++;
 		}
 	}
 	if (complete) {
-		console.log("complete subtree!");
-		node.result = (answerSet.size === answersCache[node.validAnswersRegex].length);
-//		pruneGuess(node.parentNode);
+		if (answerSet.size !== answersCache[node.validAnswersRegex].length || node.guessOutcomes[guess].length ===0) {
+			console.log("prune: delete guess", guess, node.guesses, node.guessOutcomes[guess].length, answerSet.size, answersCache[node.validAnswersRegex].length);
+			delete node.guessOutcomes[guess];
+			if (Object.keys(node.guessOutcomes).length===0) {
+				console.log("prune node", node.guesses, guessed(node));
+				node.result = false;
+				pruneGuess(node.parentNode, node.guess);
+			}
+		} else {
+			console.log("prune a winner!", node.guesses, guessed(node), answerSet.size);
+			node.result = true;
+			pruneGuess(node.parentNode, node.guess);
+		}
+	} else {
+		console.log("prune: waiting on results", incomplete);
 	}
 }
 
@@ -194,15 +209,13 @@ let guessed = function(node) {
 
 let processNode = function(node) {
 	if (answersCache[node.validAnswersRegex].length <= (6-node.guesses)) {
-		console.log("winner!", node.guesses, answersCache[node.validAnswersRegex].length);
 		node.result = true;
-//		pruneGuess(node.parentNode, node.guess);
+		pruneGuess(node.parentNode, node.guess);
 		return;
 	}
 	if (node.guesses === 5) {
-		console.log("out of guesses");
 		node.result = false;
-//		pruneGuess(node.parentNode, node.guess);
+		pruneGuess(node.parentNode, node.guess);
 		return;
 	}
 	for (let i=0; i<guessesCache[node.validGuessesRegex].length; i++) {
@@ -266,7 +279,14 @@ let processNode = function(node) {
 		if (node.guesses ===i && i!==4)
 			break;
 	}
-	queue.push(...Object.values(node.guessOutcomes).flat());
+	let newOutcomes = Object.values(node.guessOutcomes).flat();
+	if (newOutcomes.length ===0) {
+		console.log("prune no outcomes");
+		node.result = false;
+		pruneNode(node.parentNode, node.guess, guess, guessed(node));
+	}
+	else
+		queue.push(...newOutcomes)
 }
 
 while (queue.length > 0) {
