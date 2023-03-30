@@ -1,5 +1,6 @@
 const fs = require("fs");
 const DEBUG = false;
+const MAX_GUESSES = 6;
 
 let guesses = fs.readFileSync("words.txt", "utf8").split("\n");
 guesses.pop();
@@ -208,12 +209,12 @@ let guessed = function(node) {
 }
 
 let processNode = function(node) {
-	if (answersCache[node.validAnswersRegex].length <= (6-node.guesses)) {
+	if (answersCache[node.validAnswersRegex].length <= (MAX_GUESSES-node.guesses)) {
 		node.result = true;
 		pruneGuess(node.parentNode, node.guess);
 		return;
 	}
-	if (node.guesses === 5) {
+	if (node.guesses === MAX_GUESSES-1) {
 		node.result = false;
 		pruneGuess(node.parentNode, node.guess);
 		return;
@@ -227,7 +228,7 @@ let processNode = function(node) {
 			continue;
 		let outcomes = enumerateOutcomes(guess, node);
 		let answerOutcomes = [];
-		if (node.guesses===4)
+		if (node.guesses===MAX_GUESSES-2)
 			if (DEBUG) console.log("outcomes", outcomes.length, outcomes);
 		for (let j=0; j<outcomes.length; j++) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
@@ -246,7 +247,7 @@ let processNode = function(node) {
 			} else if (!!node.parentNode) {
 				if (DEBUG) console.log("helpful", answerRegex, node.parentNode.validAnswersRegex);
 			}
-			if (node.guesses === 4){
+			if (node.guesses === MAX_GUESSES-2){
 				if (DEBUG) console.log(outcomes[j], answerRegex, validAnswers);
 			}
 			node.guessOutcomes[guess].push({
@@ -276,7 +277,7 @@ let processNode = function(node) {
 			}
 			exit(2);
 		}
-		if (node.guesses ===i && i!==4)
+		if (node.guesses ===i && i!==MAX_GUESSES-2)
 			break;
 	}
 	let newOutcomes = Object.values(node.guessOutcomes).flat();
