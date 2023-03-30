@@ -264,7 +264,7 @@ let processNode = function(node) {
 		if (outcomes.length===0) {
 			continue;
 		}
-		console.log(node.guesses+1, guess, guessed(node).join(", "), guessesCache[node.validGuessesRegex].length, new Set(answersCache[node.validAnswersRegex]).size);
+		console.log(node.guesses+1, guess, guessed(node).join(" "), guessesCache[node.validGuessesRegex].length, new Set(answersCache[node.validAnswersRegex]).size);
 		if (new Set(answerOutcomes).size !== new Set(answersCache[node.validAnswersRegex]).size) {
 			console.log("answers don't match (previous answers, new outcomes set)", guess, new Set(answersCache[node.validAnswersRegex]).size, new Set(answerOutcomes).size, new Set(answersCache[node.validAnswersRegex]), new Set(answerOutcomes.sort()));
 			let iterator = node;
