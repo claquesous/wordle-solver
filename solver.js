@@ -229,22 +229,19 @@ let processNode = function(node) {
 		let answerOutcomes = [];
 		if (node.guesses===4)
 			if (DEBUG) console.log("outcomes", outcomes.length, outcomes);
-		if (outcomes.length===0) {
-			continue;
-		}
 		for (let j=0; j<outcomes.length; j++) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
 			let guessRegex = constructGuessesRegex(outcomes[j]);
 			let validGuesses = guessesCache[guessRegex] ||= guesses.filter((w) => { return !!w.match(new RegExp(guessRegex))});
 			let validAnswers = answersCache[answerRegex] ||= answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
 			if (validAnswers.length === 0){
-				if (node.guesses===4) {
-					if (DEBUG) console.log("no valid answers", guessRegex, guesses, outcomes[j]);
-				}
+				if (DEBUG) console.log("no valid answers", guessRegex, guesses, outcomes[j]);
+				outcomes.splice(j--, 1);
 				continue;
 			}
 			if (!!node.parentNode && answerRegex == node.parentNode.validAnswersRegex) {
-				console.log("unhelpful outcome", guess, outcomes[j], answerRegex, guessRegex);
+				console.log("unhelpful outcome", guess, outcomes.length, answerRegex, guessRegex);
+				outcomes.splice(j--, 1);
 				continue;
 			} else if (!!node.parentNode) {
 				if (DEBUG) console.log("helpful", answerRegex, node.parentNode.validAnswersRegex);
@@ -262,6 +259,9 @@ let processNode = function(node) {
 				guessOutcomes: {},
 			});
 			answerOutcomes.push(...validAnswers);
+		}
+		if (outcomes.length===0) {
+			continue;
 		}
 		console.log(node.guesses+1, guess, guessed(node).join(", "), guessesCache[node.validGuessesRegex].length, new Set(answersCache[node.validAnswersRegex]).size);
 		if (new Set(answerOutcomes).size !== new Set(answersCache[node.validAnswersRegex]).size) {
@@ -283,7 +283,7 @@ let processNode = function(node) {
 	if (newOutcomes.length ===0) {
 		console.log("prune no outcomes");
 		node.result = false;
-		pruneNode(node.parentNode, node.guess, guess, guessed(node));
+		pruneGuess(node.parentNode, node.guess, guessed(node));
 	}
 	else
 		queue.push(...newOutcomes)
