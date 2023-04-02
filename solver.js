@@ -31,6 +31,16 @@ let root = {
 
 queue.push(root);
 
+let setResult = function(node, result) {
+	node.result = result;
+	delete node.known;
+	delete node.misplaced;
+	delete node.missing;
+	delete node.counts;
+	delete node.guessOutcomes;
+	pruneGuess(node.parentNode, node.guess);
+}
+
 let constructGuessesRegex = function({known, misplaced, counts}) {
 	let knownArray = [".",".",".",".","."];
 	let knownCounts = {};
@@ -203,13 +213,11 @@ let pruneGuess = async function(node, guess) {
 			delete node.guessOutcomes[guess];
 			if (Object.keys(node.guessOutcomes).length===0) {
 				console.log("prune node", node.guesses, guessed(node));
-				node.result = false;
-				pruneGuess(node.parentNode, node.guess);
+				setResult(node, false);
 			}
 		} else {
 			console.log("prune a winner!", node.guesses, guessed(node), answerSet.size);
-			node.result = true;
-			pruneGuess(node.parentNode, node.guess);
+			setResult(node, true);
 		}
 	} else {
 		console.log("prune: waiting on results", incomplete);
@@ -231,13 +239,11 @@ let processNode = async function(node) {
 	if (answers.length <= (MAX_GUESSES-node.guesses)) {
 		if (answers.length !== (MAX_GUESSES-node.guesses))
 			console.log("prune winner: plenty of guesses", MAX_GUESSES-node.guesses, answers.length);
-		node.result = true;
-		pruneGuess(node.parentNode, node.guess);
+		setResult(node, true);
 		return;
 	}
 	if (node.guesses === MAX_GUESSES-1) {
-		node.result = false;
-		pruneGuess(node.parentNode, node.guess);
+		setResult(node, false);
 		return;
 	}
 	for (let i=0; i<answers.length; i++) {
@@ -312,8 +318,7 @@ let processNode = async function(node) {
 	let newOutcomes = Object.values(node.guessOutcomes).flat();
 	if (newOutcomes.length ===0) {
 		console.log("prune no outcomes");
-		node.result = false;
-		pruneGuess(node.parentNode, node.guess);
+		setResult(node, false);
 	}
 	else
 		queue.push(...newOutcomes)
