@@ -1,0 +1,11 @@
+{
+  "name": "wordle-solver",
+  "version": "0.1.0",
+  "description": "A wordler solver for hard mode",
+  "main": "solver.js",
+  "author": "Geoff Crew",
+  "license": "MIT",
+  "dependencies": {
+    "level-rocksdb": "^5.0.0"
+  }
+}

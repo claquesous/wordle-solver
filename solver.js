@@ -1,3 +1,5 @@
+const level = require('level-rocksdb');
+
 const fs = require("fs");
 const DEBUG = false;
 const MAX_GUESSES = 6;
@@ -9,11 +11,14 @@ answers.pop();
 
 let queue = [];
 
-let answersCache = {".....": answers};
-let guessesCache = {".....": guesses};
+let answersCache = level('./answerscache');
+
+//let guessesCache = {".....": guesses};
+
+
 
 let root = {
-	validGuessesRegex: ".....",
+//	validGuessesRegex: ".....",
 	validAnswersRegex: ".....",
 	known: [],
 	misplaced: [[],[],[],[],[]],
@@ -158,7 +163,7 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 	return outcomes.filter(validOutcome);
 }
 
-let pruneGuess = function(node, guess) {
+let pruneGuess = async function(node, guess) {
 	if (!node)
 		return;
 	let complete = true;
@@ -168,7 +173,9 @@ let pruneGuess = function(node, guess) {
 		let outcome = node.guessOutcomes[guess][i];
 		if (outcome.result === true) {
 			let oldSize = answerSet.size;
-			answerSet = new Set([...answerSet, ...answersCache[outcome.validAnswersRegex]]);
+			let cachedAnswers = await answersCache.get(outcome.validAnswersRegex);
+			let answers = cachedAnswers.split(",");
+			answerSet = new Set([...answerSet, ...answers]);
 			console.log("prune: winner adding", guess, oldSize, answerSet.size);
 		}
 		else if (outcome.result === false) {
@@ -181,7 +188,9 @@ let pruneGuess = function(node, guess) {
 		}
 	}
 	if (complete) {
-		if (answerSet.size !== answersCache[node.validAnswersRegex].length || node.guessOutcomes[guess].length ===0) {
+		let cachedAnswers = await answersCache.get(node.validAnswersRegex);
+		let answers = cachedAnswers.split(",");
+		if (answerSet.size !== answers.length || node.guessOutcomes[guess].length ===0) {
 			console.log("prune: delete guess", guess, node.guesses, node.guessOutcomes[guess].length, answerSet.size, answersCache[node.validAnswersRegex].length);
 			delete node.guessOutcomes[guess];
 			if (Object.keys(node.guessOutcomes).length===0) {
@@ -208,8 +217,12 @@ let guessed = function(node) {
 	return guesses;
 }
 
-let processNode = function(node) {
-	if (answersCache[node.validAnswersRegex].length <= (MAX_GUESSES-node.guesses)) {
+let processNode = async function(node) {
+	const answersString = await answersCache.get(node.validAnswersRegex);
+	const answers = answersString.split(",");
+	if (answers.length <= (MAX_GUESSES-node.guesses)) {
+		if (answers.length !== (MAX_GUESSES-node.guesses))
+			console.log("prune winner: plenty of guesses", MAX_GUESSES-node.guesses, answers.length);
 		node.result = true;
 		pruneGuess(node.parentNode, node.guess);
 		return;
@@ -219,8 +232,8 @@ let processNode = function(node) {
 		pruneGuess(node.parentNode, node.guess);
 		return;
 	}
-	for (let i=0; i<guessesCache[node.validGuessesRegex].length; i++) {
-		let guess = guessesCache[node.validGuessesRegex][i];
+	for (let i=0; i<answers.length; i++) {
+		let guess = answers[i];
 		if (node.guesses===0)
 			guess = "chump";
 		node.guessOutcomes[guess] = [];
@@ -232,9 +245,17 @@ let processNode = function(node) {
 			if (DEBUG) console.log("outcomes", outcomes.length, outcomes);
 		for (let j=0; j<outcomes.length; j++) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
-			let guessRegex = constructGuessesRegex(outcomes[j]);
-			let validGuesses = guessesCache[guessRegex] ||= guesses.filter((w) => { return !!w.match(new RegExp(guessRegex))});
-			let validAnswers = answersCache[answerRegex] ||= answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
+//			let guessRegex = constructGuessesRegex(outcomes[j]);
+//			let validGuesses = guessesCache[guessRegex] ||= guesses.filter((w) => { return !!w.match(new RegExp(guessRegex))});
+			let validAnswers;
+			try {
+				let cachedAnswers = await answersCache.get(answerRegex);
+				validAnswers = cachedAnswers.split(",");
+			} catch (NotFoundError) {
+				validAnswers = answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
+				if (validAnswers.length > 0)
+					await answersCache.put(answerRegex, validAnswers);
+			}
 			if (validAnswers.length === 0){
 				if (DEBUG) console.log("no valid answers", guessRegex, guesses, outcomes[j]);
 				outcomes.splice(j--, 1);
@@ -252,7 +273,7 @@ let processNode = function(node) {
 			}
 			node.guessOutcomes[guess].push({
 				guess,
-				validGuessesRegex: guessRegex,
+			//	validGuessesRegex: guessRegex,
 				validAnswersRegex: answerRegex,
 				...outcomes[j],
 				parentNode: node,
@@ -264,9 +285,9 @@ let processNode = function(node) {
 		if (outcomes.length===0) {
 			continue;
 		}
-		console.log(node.guesses+1, guess, guessed(node).join(" "), guessesCache[node.validGuessesRegex].length, new Set(answersCache[node.validAnswersRegex]).size);
-		if (new Set(answerOutcomes).size !== new Set(answersCache[node.validAnswersRegex]).size) {
-			console.log("answers don't match (previous answers, new outcomes set)", guess, new Set(answersCache[node.validAnswersRegex]).size, new Set(answerOutcomes).size, new Set(answersCache[node.validAnswersRegex]), new Set(answerOutcomes.sort()));
+		console.log(node.guesses+1, guess, guessed(node).join(" "), outcomes.length, answers.length, node.validAnswersRegex);
+		if (new Set(answerOutcomes).size !== answers.length) {
+			console.log("answers don't match (previous answers, new outcomes set)", guess, answers.length, new Set(answerOutcomes).size);
 			let iterator = node;
 			while (iterator.guesses !==0) {
 				let {guessOutcomes, parentNode, ...loggable} = iterator;
@@ -277,23 +298,26 @@ let processNode = function(node) {
 			}
 			exit(2);
 		}
-		if (node.guesses ===i && i!==MAX_GUESSES-2)
+		if (node.guesses ===0)
 			break;
 	}
 	let newOutcomes = Object.values(node.guessOutcomes).flat();
 	if (newOutcomes.length ===0) {
 		console.log("prune no outcomes");
 		node.result = false;
-		pruneGuess(node.parentNode, node.guess, guessed(node));
+		pruneGuess(node.parentNode, node.guess);
 	}
 	else
 		queue.push(...newOutcomes)
 }
 
-while (queue.length > 0) {
-	let node = queue.pop();
-	processNode(node);
-}
+answersCache.put(".....", answers, async function() {
+	while (queue.length > 0) {
+		let node = queue.shift();
+		await processNode(node);
+	}
+});
+//processNode(root);
 
 //console.log(root.guessOutcomes);
 console.log("done");
