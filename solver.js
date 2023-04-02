@@ -33,24 +33,30 @@ queue.push(root);
 
 let constructGuessesRegex = function({known, misplaced, counts}) {
 	let knownArray = [".",".",".",".","."];
+	let knownCounts = {};
 	let regex;
 	for (let i=0; i<5; i++) {
-		if (!!known[i])
+		if (!!known[i]) {
 			knownArray[i] = known[i];
+			knownCounts[known[i]] = (knownCounts[known[i]] || 0) + 1;
+		}
 	}
 	regex = knownArray.join("");
 	Object.keys(counts).forEach((letter) => {
-		regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
+		if (!knownCounts[letter] || counts[letter] > knownCounts[letter])
+			regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
 	});
 	return regex;
 };
 
 let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	let knownArray = [".",".",".",".","."];
+	let knownCounts = {};
 	let regex;
 	for (let i=0; i<5; i++) {
 		if (!!known[i]) {
 			knownArray[i] = known[i];
+			knownCounts[known[i]] = (knownCounts[known[i]] || 0) + 1;
 		}
 		else if(misplaced[i].length > 0) {
 			knownArray[i] = `[^${misplaced[i].sort().join("")}]`;
@@ -58,7 +64,9 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	}
 	regex = knownArray.join("");
 	Object.keys(counts).forEach((letter) => {
-		regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
+		if (!knownCounts[letter] || counts[letter] > knownCounts[letter]) {
+			regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
+		}
 		if (missing.includes(letter)) {
 			regex = regex.concat(`(?<=([^${letter}].*){${5-counts[letter]}})`);
 		}
