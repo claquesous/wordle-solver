@@ -1,6 +1,6 @@
 const level = require('level-rocksdb');
-
 const fs = require("fs");
+
 const DEBUG = false;
 const MAX_GUESSES = 6;
 
@@ -11,25 +11,52 @@ answers.pop();
 
 let queue = [];
 
-let answersCache = level('./answerscache');
-
+let answersCache = level("./answerscache");
 //let guessesCache = {".....": guesses};
 
+let root;
+let lastWrite = 0;
 
+let relink = function(node) {
+	if (!Object.hasOwn(node, "result") && Object.keys(node.guessOutcomes).length === 0) {
+		queue.push(node);
+	}
+	Object.keys(node.guessOutcomes).forEach((guess) => {
+		node.guessOutcomes[guess].forEach((outcome) => {
+			outcome.parentKey = Symbol();
+			outcome[outcome.parentKey] = node;
+			relink(outcome);
+		});
+	});
+}
 
-let root = {
-//	validGuessesRegex: ".....",
-	validAnswersRegex: ".....",
-	known: [],
-	misplaced: [[],[],[],[],[]],
-	missing: [],
-	counts: {},
-	parentNode: null,
-	guesses: 0,
-	guessOutcomes: {},
-};
+try {
+	root = require("./solvetree.json");
+	lastWrite = JSON.stringify(root).length;
+	relink(root);
+} catch (error) {
+	root = {
+	//	validGuessesRegex: ".....",
+		validAnswersRegex: ".....",
+		known: [],
+		misplaced: [[],[],[],[],[]],
+		missing: [],
+		counts: {},
+		parentKey: null,
+		guesses: 0,
+		guessOutcomes: {},
+	};
+	queue.push(root);
+}
 
-queue.push(root);
+let saveRoot = function() {
+	let string = JSON.stringify(root, null, 2);
+	console.log("size:", string.length, lastWrite);
+	if (string.length > lastWrite + (1024*1024)) {
+		fs.writeFileSync("./solvetree.json", string, "utf8");
+		lastWrite = string.length;
+	}
+}
 
 let setResult = function(node, result) {
 	node.result = result;
@@ -38,7 +65,7 @@ let setResult = function(node, result) {
 	delete node.missing;
 	delete node.counts;
 	delete node.guessOutcomes;
-	pruneGuess(node.parentNode, node.guess);
+	pruneGuess(node[node.parentKey], node.guess);
 }
 
 let constructGuessesRegex = function({known, misplaced, counts}) {
@@ -230,7 +257,7 @@ let guessed = function(node) {
 	let guesses=[];
 	while (!!node.guess) {
 		guesses.push(node.guess);
-		node=node.parentNode;
+		node=node[node.parentKey];
 	}
 	return guesses;
 }
@@ -277,22 +304,24 @@ let processNode = async function(node) {
 				outcomes.splice(j--, 1);
 				continue;
 			}
-			if (!!node.parentNode && answerRegex == node.parentNode.validAnswersRegex) {
+			if (!!node.parentKey && answerRegex == node[node.parentKey].validAnswersRegex) {
 				console.log("unhelpful outcome", guess, outcomes.length, answerRegex, guessRegex);
 				outcomes.splice(j--, 1);
 				continue;
-			} else if (!!node.parentNode) {
-				if (DEBUG) console.log("helpful", answerRegex, node.parentNode.validAnswersRegex);
+			} else if (!!node.parentKey) {
+				if (DEBUG) console.log("helpful", answerRegex, node[node.parentKey].validAnswersRegex);
 			}
 			if (node.guesses === MAX_GUESSES-2){
 				if (DEBUG) console.log(outcomes[j], answerRegex, validAnswers);
 			}
+			const parentKey = Symbol();
 			node.guessOutcomes[guess].push({
 				guess,
 			//	validGuessesRegex: guessRegex,
 				validAnswersRegex: answerRegex,
 				...outcomes[j],
-				parentNode: node,
+				parentKey,
+				[parentKey]: node,
 				guesses: node.guesses+1,
 				guessOutcomes: {},
 			});
@@ -306,11 +335,12 @@ let processNode = async function(node) {
 			console.log("answers don't match (previous answers, new outcomes set)", guess, answers.length, new Set(answerOutcomes).size);
 			let iterator = node;
 			while (iterator.guesses !==0) {
-				let {guessOutcomes, parentNode, ...loggable} = iterator;
+				let parentKey = iterator.parentKey;
+				let {guessOutcomes, ...loggable} = iterator;
 				console.log(loggable);
 				console.log(constructAnswersRegex(iterator));
 				console.log(constructGuessesRegex(iterator));
-				iterator = iterator.parentNode;
+				iterator = iterator[parentKey];
 			}
 			exit(2);
 		}
@@ -322,8 +352,10 @@ let processNode = async function(node) {
 		console.log("prune no outcomes");
 		setResult(node, false);
 	}
-	else
-		queue.push(...newOutcomes)
+	else {
+		queue.push(...newOutcomes);
+		saveRoot();
+	}
 }
 
 answersCache.put(".....", answers, async function() {
