@@ -63,6 +63,7 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	let knownArray = [".",".",".",".","."];
 	let knownCounts = {};
 	let regex;
+	let totalCount = 0;
 	for (let i=0; i<5; i++) {
 		if (!!known[i]) {
 			knownArray[i] = known[i];
@@ -74,6 +75,7 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	}
 	regex = knownArray.join("");
 	Object.keys(counts).forEach((letter) => {
+		totalCount += counts[letter];
 		if (!knownCounts[letter] || counts[letter] > knownCounts[letter]) {
 			regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
 		}
@@ -81,7 +83,7 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 			regex = regex.concat(`(?<=([^${letter}].*){${5-counts[letter]}})`);
 		}
 	});
-	if (missing.length > 0 ) {
+	if (missing.length > 0 && totalCount <5) {
 		let filtered = missing.filter((x)=>{return !counts[x]});
 		regex = regex.concat(`(?<!([${[...new Set(filtered.sort())].join("")}].*))`);
 	}
