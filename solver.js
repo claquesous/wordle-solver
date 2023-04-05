@@ -89,7 +89,7 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	return regex;
 };
 
-let createNode = function(outcome ) {
+let createNode = function(outcome, guesses) {
 	let node = {...outcome};
 	node.validGuessesRegex = constructGuessesRegex(outcome);
 	node.validAnswersRegex = constructAnswersRegex(outcome);
@@ -98,7 +98,11 @@ let createNode = function(outcome ) {
 	node.key = hash.digest('hex');
 	let filename = `./solve/${node.key}.json`;
 	try {
-		const file = require(filename);
+		const existingNode = require(filename);
+		if (guesses < existingNode.guesses) {
+			existingNode.guesses = guesses;
+			saveNode(existingNode);
+		}
 	} catch (error) {
 		saveNode(node);
 	}
@@ -107,7 +111,7 @@ let createNode = function(outcome ) {
 
 let saveNode = function(node) {
 	let filename = `./solve/${node.key}.json`;
-	const string = JSON.stringify(node, null, 2);
+	const string = JSON.stringify(node);
 	fs.writeFileSync(filename, string, "utf8");
 }
 
@@ -265,8 +269,8 @@ let guessed = function(node) {
 
 let processNode = async function(key) {
 	let node = require(`./solve/${key}.json`);
-	if (node.hasOwnProperty('guessOutcomes'))
-		return;
+//	if (node.hasOwnProperty('guessOutcomes'))
+//		return;
 	node.guessOutcomes = {};
 	const answersString = await answersCache.get(node.validAnswersRegex);
 	const answers = answersString.split(",");
@@ -275,11 +279,11 @@ let processNode = async function(key) {
 			console.log("prune winner: plenty of guesses", MAX_GUESSES-node.guesses, answers.length);
 		setResult(node, true);
 		return;
-	}
-	if (node.guesses === MAX_GUESSES-1) {
-		setResult(node, false);
-		return;
 	}*/
+	if (node.guesses === MAX_GUESSES-1) {
+	//	setResult(node, false);
+		return;
+	}
 	for (let i=0; i<answers.length; i++) {
 		let guess = answers[i];
 /*		if (node.guesses===0)
@@ -319,13 +323,13 @@ let processNode = async function(key) {
 			if (node.guesses === MAX_GUESSES-2){
 				if (DEBUG) console.log(outcomes[j], answerRegex, validAnswers);
 			}*/
-			node.guessOutcomes[guess].push(createNode(outcomes[j], key));
+			node.guessOutcomes[guess].push(createNode(outcomes[j], node.guesses+1));
 			answerOutcomes.push(...validAnswers);
 		}
 		if (outcomes.length===0) {
 			continue;
 		}
-		console.log(guess, outcomes.length, answers.length, node.validAnswersRegex, key);
+		console.log(guess, outcomes.length, `${i+1}/${answers.length}`, node.validAnswersRegex, key);
 		if (new Set(answerOutcomes).size !== answers.length) {
 			console.log("answers don't match (previous answers, new outcomes set)", guess, answers.length, new Set(answerOutcomes).size);
 			let iterator = node;
