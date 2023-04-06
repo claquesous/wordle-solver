@@ -96,9 +96,10 @@ let createNode = function(outcome, guesses) {
 	const hash = crypto.createHash('sha1');
 	hash.update(node.validAnswersRegex);
 	node.key = hash.digest('hex');
-	let filename = `./solve/${node.key}.json`;
+	let filename = `./solve/${node.key.substr(-5)}.json`;
 	try {
-		const existingNode = require(filename);
+		const existingNode = require(filename)[node.key];
+
 		if (guesses < existingNode.guesses) {
 			existingNode.guesses = guesses;
 			saveNode(existingNode);
@@ -110,8 +111,15 @@ let createNode = function(outcome, guesses) {
 }
 
 let saveNode = function(node) {
-	let filename = `./solve/${node.key}.json`;
-	const string = JSON.stringify(node);
+	let filename = `./solve/${node.key.substr(-5)}.json`;
+	let nodes;
+	try {
+		nodes = require(filename);
+	} catch (error) {
+		nodes = {};
+	}
+	nodes[node.key] = node;
+	const string = JSON.stringify(nodes);
 	fs.writeFileSync(filename, string, "utf8");
 }
 
@@ -268,7 +276,7 @@ let guessed = function(node) {
 }
 
 let processNode = async function(key) {
-	let node = require(`./solve/${key}.json`);
+	let node = require(`./solve/${key.substr(-5)}.json`)[key];
 //	if (node.hasOwnProperty('guessOutcomes'))
 //		return;
 	node.guessOutcomes = {};
