@@ -43,15 +43,18 @@ let setResult = function(node, result) {
 let constructGuessesRegex = function({known, misplaced, counts}) {
 	let knownArray = [".",".",".",".","."];
 	let knownCounts = {};
+	let knownCount = 0;
 	let regex;
 	for (let i=0; i<5; i++) {
 		if (!!known[i]) {
 			knownArray[i] = known[i];
 			knownCounts[known[i]] = (knownCounts[known[i]] || 0) + 1;
+			knownCount++;
 		}
 	}
 	regex = knownArray.join("");
-	Object.keys(counts).forEach((letter) => {
+	if (knownCount === 5) return regex;
+	Object.keys(counts).sort().forEach((letter) => {
 		if (!knownCounts[letter] || counts[letter] > knownCounts[letter])
 			regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
 	});
@@ -61,19 +64,22 @@ let constructGuessesRegex = function({known, misplaced, counts}) {
 let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	let knownArray = [".",".",".",".","."];
 	let knownCounts = {};
+	let knownCount = 0;
 	let regex;
 	let totalCount = 0;
 	for (let i=0; i<5; i++) {
 		if (!!known[i]) {
 			knownArray[i] = known[i];
 			knownCounts[known[i]] = (knownCounts[known[i]] || 0) + 1;
+			knownCount++;
 		}
 		else if(misplaced[i].length > 0) {
 			knownArray[i] = `[^${misplaced[i].sort().join("")}]`;
 		}
 	}
 	regex = knownArray.join("");
-	Object.keys(counts).forEach((letter) => {
+	if (knownCount === 5) return regex;
+	Object.keys(counts).sort().forEach((letter) => {
 		totalCount += counts[letter];
 		if (!knownCounts[letter] || counts[letter] > knownCounts[letter]) {
 			regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
