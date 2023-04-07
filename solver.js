@@ -73,8 +73,16 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 			knownCounts[known[i]] = (knownCounts[known[i]] || 0) + 1;
 			knownCount++;
 		}
-		else if(misplaced[i].length > 0) {
-			knownArray[i] = `[^${misplaced[i].sort().join("")}]`;
+	}
+	for (let i=0; i<5; i++) {
+		let mysteryLetters = misplaced[i].sort().filter((letter) => {
+			if (missing.includes(letter) && knownCounts[letter] === counts[letter]) {
+				return false;
+			}
+			return true;
+		});
+		if (!known[i] && (mysteryLetters.length > 0)) {
+			knownArray[i] = `[^${mysteryLetters.join("")}]`;
 		}
 	}
 	regex = knownArray.join("");
@@ -295,10 +303,10 @@ let processNode = async function(key) {
 	//	setResult(node, true);
 		return;
 	}
-	if (node.guesses === MAX_GUESSES-1) {
+	//if (node.guesses === MAX_GUESSES-1) {
 	//	setResult(node, false);
-		return;
-	}
+	//	return;
+	//}
 	for (let i=0; i<answers.length; i++) {
 		let guess = answers[i];
 /*		if (node.guesses===0)
