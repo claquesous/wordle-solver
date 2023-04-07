@@ -102,11 +102,12 @@ let createNode = function(outcome, guesses) {
 	const hash = crypto.createHash('sha1');
 	hash.update(node.validAnswersRegex);
 	node.key = hash.digest('hex');
+	node.guesses = guesses;
 	let filename = `./solve/${node.key.substr(-5)}.json`;
 	try {
 		const existingNode = require(filename)[node.key];
 
-		if (guesses < existingNode.guesses) {
+		if (!existingNode.guesses || guesses < existingNode.guesses) {
 			existingNode.guesses = guesses;
 			saveNode(existingNode);
 		}
@@ -134,7 +135,7 @@ queue.push(createNode({
 	misplaced: [[],[],[],[],[]],
 	missing: [],
 	counts: {},
-}, null));
+}, 0));
 
 let validOutcome = function({known, misplaced, missing, counts}) {
 	const knownCount = known.filter((x) => {return !!x}).length;
@@ -288,12 +289,12 @@ let processNode = async function(key) {
 	node.guessOutcomes = {};
 	const answersString = await answersCache.get(node.validAnswersRegex);
 	const answers = answersString.split(",");
-/*	if (answers.length <= (MAX_GUESSES-node.guesses)) {
-		if (answers.length !== (MAX_GUESSES-node.guesses))
-			console.log("prune winner: plenty of guesses", MAX_GUESSES-node.guesses, answers.length);
-		setResult(node, true);
+	if (answers.length <= 2) {
+	//	if (answers.length !== (MAX_GUESSES-node.guesses))
+	//		console.log("prune winner: plenty of guesses", MAX_GUESSES-node.guesses, answers.length);
+	//	setResult(node, true);
 		return;
-	}*/
+	}
 	if (node.guesses === MAX_GUESSES-1) {
 	//	setResult(node, false);
 		return;
@@ -303,8 +304,8 @@ let processNode = async function(key) {
 /*		if (node.guesses===0)
 			guess = "chump";*/
 		node.guessOutcomes[guess] = [];
-		if (guessed(node).includes(guess))
-			continue;
+		//if (guessed(node).includes(guess))
+		//	continue;
 		let outcomes = enumerateOutcomes(guess, node);
 		let answerOutcomes = [];
 		if (node.guesses===MAX_GUESSES-2)
@@ -343,7 +344,7 @@ let processNode = async function(key) {
 		if (outcomes.length===0) {
 			continue;
 		}
-		console.log(guess, outcomes.length, `${i+1}/${answers.length}`, node.validAnswersRegex, key);
+		console.log(node.guesses, guess, outcomes.length, `${i+1}/${answers.length}`, node.validAnswersRegex, key);
 		if (new Set(answerOutcomes).size !== answers.length) {
 			console.log("answers don't match (previous answers, new outcomes set)", guess, answers.length, new Set(answerOutcomes).size);
 			let iterator = node;
@@ -359,7 +360,7 @@ let processNode = async function(key) {
 		}
 /*		if (node.guesses ===0)
 			break;*/
-		queue.push(...node.guessOutcomes[guess]);
+		queue.unshift(...node.guessOutcomes[guess]);
 	}
 /*	let newOutcomes = Object.values(node.guessOutcomes).flat();
 	if (newOutcomes.length ===0) {
