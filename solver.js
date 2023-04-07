@@ -352,7 +352,7 @@ let processNode = async function(key) {
 		if (outcomes.length===0) {
 			continue;
 		}
-		console.log(node.guesses, guess, outcomes.length, `${i+1}/${answers.length}`, node.validAnswersRegex, key);
+		console.log(node.guesses, guess, outcomes.length, `${i+1}/${answers.length}`, queue.length, node.validAnswersRegex, key);
 		if (new Set(answerOutcomes).size !== answers.length) {
 			console.log("answers don't match (previous answers, new outcomes set)", guess, answers.length, new Set(answerOutcomes).size);
 			let iterator = node;
@@ -366,9 +366,10 @@ let processNode = async function(key) {
 			}
 			exit(2);
 		}
+		queue.unshift(...node.guessOutcomes[guess]);
+		queue = [...new Set(queue)];
 /*		if (node.guesses ===0)
 			break;*/
-		queue.unshift(...node.guessOutcomes[guess]);
 	}
 /*	let newOutcomes = Object.values(node.guessOutcomes).flat();
 	if (newOutcomes.length ===0) {
