@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 let constructGuessesRegex = function({known, misplaced, counts}) {
 	let knownArray = [".",".",".",".","."];
 	let knownCounts = {};
@@ -61,4 +63,11 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	return regex;
 };
 
-module.exports = { constructGuessesRegex, constructAnswersRegex };
+const regexToHash = function(regex) {
+	const hash = crypto.createHash('sha1');
+	hash.update(regex);
+	return hash.digest('hex');
+}
+
+module.exports = { constructGuessesRegex, constructAnswersRegex, regexToHash };
+

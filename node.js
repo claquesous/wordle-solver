@@ -1,8 +1,7 @@
-const crypto = require('crypto');
 const fs = require('fs');
 
 const { enumerateOutcomes } = require('./outcomes');
-const { constructGuessesRegex, constructAnswersRegex } = require('./regex');
+const { constructGuessesRegex, constructAnswersRegex, regexToHash } = require('./regex');
 const { answersCache } = require('./cache');
 
 const MAX_GUESSES = 6;
@@ -11,9 +10,7 @@ let createNode = function(outcome, guesses) {
 	let node = {...outcome};
 	node.validGuessesRegex = constructGuessesRegex(outcome);
 	node.validAnswersRegex = constructAnswersRegex(outcome);
-	const hash = crypto.createHash('sha1');
-	hash.update(node.validAnswersRegex);
-	node.key = hash.digest('hex');
+	node.key = regexToHash(node.validAnswersRegex);
 	node.guesses = guesses;
 	let filename = `./solve/${node.key.substr(-5)}.json`;
 	try {
