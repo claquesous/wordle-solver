@@ -56,9 +56,8 @@ let processNode = async function(key, queue = []) {
 //	if (node.hasOwnProperty('guessOutcomes'))
 //		return;
 	node.guessOutcomes = {};
-	const answersString = await answersCache.get(node.validAnswersRegex);
-	const answers = answersString.split(",");
-	if (answers.length <= 2) {
+	const answers = await getAnswers(node);
+	if (answers.length <= 1) {
 	//	if (answers.length !== (MAX_GUESSES-node.guesses))
 	//		console.log("prune winner: plenty of guesses", MAX_GUESSES-node.guesses, answers.length);
 	//	setResult(node, true);
@@ -143,5 +142,37 @@ let processNode = async function(key, queue = []) {
 	saveNode(node);
 }
 
-module.exports = { createNode, saveNode, processNode, nodeExists };
+let nodeHeight = async function(key) {
+	let node = JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
+
+	const answers = await getAnswers(node);
+
+	if (answers.length <=2) {
+		return answers.length;
+	}
+	let minHeight = answers.length;
+	for (let i=0; i<answers.length; i++) {
+		let outcomes = node.guessOutcomes[answers[i]];
+		let maxOutcome = 0;
+		for (let j=0; j<outcomes.length; j++) {
+			let outcomeHeight = await nodeHeight(outcomes[j]);
+			if (outcomeHeight > maxOutcome) {
+				maxOutcome = outcomeHeight;
+			}
+		}
+		if (maxOutcome <= minHeight) {
+			minHeight = maxOutcome;
+			if (node.guesses ===0)
+				console.log("Min height:", minHeight, answers[i]);
+		}
+	}
+	return minHeight;
+}
+
+let getAnswers = async function(node) {
+	const answersString = await answersCache.get(node.validAnswersRegex);
+	return answersString.split(",");
+}
+
+module.exports = { createNode, saveNode, processNode, nodeExists, nodeHeight, getAnswers };
 

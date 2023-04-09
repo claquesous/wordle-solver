@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const { constructAnswersRegex, regexToHash } = require('./regex');
-const { processNode, nodeExists } = require('./node');
+const { processNode, nodeExists, getAnswers } = require('./node');
 
 if (!fs.existsSync('./solve')) {
 	console.log("No solve directory");
@@ -49,17 +49,22 @@ let fixupRegex = async function() {
 let validateTree = async function() {
 	const dir = fs.opendirSync("./solve");
 	let queue = [];
+	let totalCount=0;
 	for await (const file of dir) {
-		console.log("Found file:", file.name, mismatchCount, "out of", totalCount);
-		totalCount++;
-
-		const nodesArray = require(`./solve/${file.name}`);
+		const nodesArray = JSON.parse(fs.readFileSync(`./solve/${file.name}`));
 		let keys = Object.keys(nodesArray);
-		keys.forEach(key => {
+		keys.forEach(async (key) => {
 			let node = nodesArray[key];
+			const answers = await getAnswers(node);
+
+			if (!node.guessOutcomes){
+				await processNode(key, queue);
+				return;
+			}
 			let guesses = Object.keys(node.guessOutcomes);
-			if (guesses.length === 0) {
-				processNode(key, queue);
+			if (guesses.length < answers.length) {
+				console.log("Unprocessed", key);
+				await processNode(key, queue);
 			}
 			else {
 				let valid = true;
@@ -68,7 +73,8 @@ let validateTree = async function() {
 					for (let j=0; j<outcomes.length; j++) {
 						valid = nodeExists(outcomes[j]);
 						if (!valid) {
-							processNode(key);
+							console.log("Non-existent", key);
+							await processNode(key);
 							break;
 						}
 					}
@@ -78,11 +84,12 @@ let validateTree = async function() {
 		while(queue.length > 0) {
 			await processNode(queue.shift(), queue);
 		}
+		console.log("Through:", ++totalCount);
 	}
 };
 
 (async () => {
-	await fixupRegex();
+	//await fixupRegex();
 	await validateTree();
 })();
 
