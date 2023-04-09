@@ -63,17 +63,11 @@ let processNode = async function(key, queue = []) {
 	//	setResult(node, true);
 		return;
 	}
-	//if (node.guesses === MAX_GUESSES-1) {
-	//	setResult(node, false);
-	//	return;
-	//}
 	for (let i=0; i<answers.length; i++) {
 		let guess = answers[i];
 /*		if (node.guesses===0)
 			guess = "chump";*/
 		node.guessOutcomes[guess] = [];
-		//if (guessed(node).includes(guess))
-		//	continue;
 		let outcomes = enumerateOutcomes(guess, node);
 		let answerOutcomes = [];
 		if (node.guesses===MAX_GUESSES-2)
@@ -96,16 +90,6 @@ let processNode = async function(key, queue = []) {
 				outcomes.splice(j--, 1);
 				continue;
 			}
-/*			if (!!node.parentKey && answerRegex == node[node.parentKey].validAnswersRegex) {
-				console.log("unhelpful outcome", guess, outcomes.length, answerRegex, guessRegex);
-				outcomes.splice(j--, 1);
-				continue;
-			} else if (!!node.parentKey) {
-				if (process.env.DEBUG) console.log("helpful", answerRegex, node[node.parentKey].validAnswersRegex);
-			}
-			if (node.guesses === MAX_GUESSES-2){
-				if (process.env.DEBUG) console.log(outcomes[j], answerRegex, validAnswers);
-			}*/
 			node.guessOutcomes[guess].push(createNode(outcomes[j], node.guesses+1));
 			answerOutcomes.push(...validAnswers);
 		}
@@ -115,15 +99,10 @@ let processNode = async function(key, queue = []) {
 		console.log(node.guesses, guess, outcomes.length, `${i+1}/${answers.length}`, queue.length, node.validAnswersRegex, key);
 		if (new Set(answerOutcomes).size !== answers.length) {
 			console.log("answers don't match (previous answers, new outcomes set)", guess, answers.length, new Set(answerOutcomes).size);
-			let iterator = node;
-			while (iterator.guesses !==0) {
-				let parentKey = iterator.parentKey;
-				let {guessOutcomes, ...loggable} = iterator;
-				console.log(loggable);
-				console.log(constructAnswersRegex(iterator));
-				console.log(constructGuessesRegex(iterator));
-				iterator = iterator[parentKey];
-			}
+			let {guessOutcomes, ...loggable} = node;
+			console.log(loggable);
+			console.log(constructAnswersRegex(node));
+			console.log(constructGuessesRegex(node));
 			exit(2);
 		}
 		queue.unshift(...node.guessOutcomes[guess]);

@@ -10,24 +10,8 @@ answers.pop();
 
 let queue = [];
 
-let root;
-let lastWrite = 0;
-
 if (!fs.existsSync('./solve')) {
 	fs.mkdirSync('./solve');
-}
-
-let relink = function(node) {
-	if (!Object.hasOwn(node, "result") && Object.keys(node.guessOutcomes).length === 0) {
-		queue.push(node);
-	}
-	Object.keys(node.guessOutcomes).forEach((guess) => {
-		node.guessOutcomes[guess].forEach((outcome) => {
-			outcome.parentKey = Symbol();
-			outcome[outcome.parentKey] = node;
-			relink(outcome);
-		});
-	});
 }
 
 let setResult = function(node, result) {
@@ -85,25 +69,12 @@ let pruneGuess = async function(node, guess) {
 	}
 }
 
-let guessed = function(node) {
-	let guesses=[];
-	while (!!node.guess) {
-		guesses.push(node.guess);
-		node=node[node.parentKey];
-	}
-	return guesses;
-}
-
 answersCache.put(".....", answers, async function() {
 	while (queue.length > 0) {
 		let node = queue.shift();
 		await processNode(node, queue);
 	}
 });
-//processNode(root);
-
-//console.log(root.guessOutcomes);
-console.log("done");
 
 // Right poistion x....
 // Wrong position x AND (?!x....)
