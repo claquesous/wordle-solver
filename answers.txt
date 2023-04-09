@@ -1810,6 +1810,7 @@ smoke
 smoky
 smote
 snack
+snafu
 snail
 snake
 snaky
