@@ -14,7 +14,7 @@ let createNode = function(outcome, guesses) {
 	node.guesses = guesses;
 	let filename = `./solve/${node.key.substr(-5)}.json`;
 	try {
-		const existingNode = require(filename)[node.key];
+		const existingNode = JSON.parse(fs.readFileSync(filename))[node.key];
 
 		if (!existingNode.guesses || guesses < existingNode.guesses) {
 			existingNode.guesses = guesses;
@@ -26,11 +26,22 @@ let createNode = function(outcome, guesses) {
 	return node.key;
 }
 
+let nodeExists = function(key) {
+	let filename = `./solve/${key.substr(-5)}.json`;
+	let nodes;
+	try {
+		nodes = JSON.parse(fs.readFileSync(filename));
+		return Object.keys(nodes).indexOf(key) >= 0;
+	} catch (error) {
+		return false;
+	}
+}
+
 let saveNode = function(node) {
 	let filename = `./solve/${node.key.substr(-5)}.json`;
 	let nodes;
 	try {
-		nodes = require(filename);
+		nodes = JSON.parse(fs.readFileSync(filename));
 	} catch (error) {
 		nodes = {};
 	}
@@ -41,7 +52,7 @@ let saveNode = function(node) {
 
 
 let processNode = async function(key, queue = []) {
-	let node = require(`./solve/${key.substr(-5)}.json`)[key];
+	let node = JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
 //	if (node.hasOwnProperty('guessOutcomes'))
 //		return;
 	node.guessOutcomes = {};
@@ -132,5 +143,5 @@ let processNode = async function(key, queue = []) {
 	saveNode(node);
 }
 
-module.exports = { createNode, saveNode, processNode };
+module.exports = { createNode, saveNode, processNode, nodeExists };
 
