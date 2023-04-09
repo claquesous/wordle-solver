@@ -105,19 +105,12 @@ let processNode = async function(key, queue = []) {
 			console.log(constructGuessesRegex(node));
 			exit(2);
 		}
-		queue.unshift(...node.guessOutcomes[guess]);
-		queue = [...new Set(queue)];
+//		queue.unshift(...node.guessOutcomes[guess]);
 /*		if (node.guesses ===0)
 			break;*/
 	}
-/*	let newOutcomes = Object.values(node.guessOutcomes).flat();
-	if (newOutcomes.length ===0) {
-		console.log("prune no outcomes");
-//		setResult(node, false);
-	}
-	else {
-		queue.push(...newOutcomes);
-	}*/
+	let newOutcomes = Object.values(node.guessOutcomes).flat();
+	queue.unshift(...newOutcomes);
 	saveNode(node);
 }
 

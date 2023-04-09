@@ -73,7 +73,9 @@ answersCache.put(".....", answers, async function() {
 	while (queue.length > 0) {
 		let node = queue.shift();
 		await processNode(node, queue);
+		queue = [...new Set(queue)];
 	}
+	console.log("done");
 });
 
 // Right poistion x....
