@@ -1,7 +1,7 @@
 const fs = require("fs");
 
 const { createNode, saveNode, processNode } = require('./node');
-const { answersCache } = require('./cache');
+const { answersCache, processedCache } = require('./cache');
 
 let guesses = fs.readFileSync("words.txt", "utf8").split("\n");
 guesses.pop();
@@ -69,13 +69,19 @@ let pruneGuess = async function(node, guess) {
 	}
 }
 
-answersCache.put(".....", answers, async function() {
-	while (queue.length > 0) {
-		let node = queue.shift();
-		await processNode(node, queue);
-		queue = [...new Set(queue)];
-	}
-	console.log("done");
+answersCache.put(".....", answers, function() {
+	processedCache.clear(async (error) => {
+		if (error) {
+			console.log('processed clear error', error);
+			return;
+		}
+		while (queue.length > 0) {
+			let node = queue.shift();
+			await processNode(node, queue);
+			queue = [...new Set(queue)];
+		}
+		console.log("done");
+	});
 });
 
 // Right poistion x....

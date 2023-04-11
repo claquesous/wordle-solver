@@ -2,7 +2,7 @@ const fs = require('fs');
 
 const { enumerateOutcomes } = require('./outcomes');
 const { constructGuessesRegex, constructAnswersRegex, regexToHash } = require('./regex');
-const { answersCache } = require('./cache');
+const { answersCache, processedCache } = require('./cache');
 
 const MAX_GUESSES = 6;
 
@@ -55,6 +55,13 @@ let processNode = async function(key, queue = []) {
 	let node = JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
 //	if (node.hasOwnProperty('guessOutcomes'))
 //		return;
+	try {
+		let cached = await processedCache.get(key);
+		return;
+	} catch (NotFoundError) {
+		// proceed
+	}
+
 	node.guessOutcomes = {};
 	const answers = await getAnswers(node);
 	if (answers.length <= 1) {
@@ -112,6 +119,7 @@ let processNode = async function(key, queue = []) {
 	let newOutcomes = Object.values(node.guessOutcomes).flat();
 	queue.unshift(...newOutcomes);
 	saveNode(node);
+	await processedCache.put(key, true);
 }
 
 let nodeHeight = async function(key) {
