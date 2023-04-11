@@ -76,7 +76,6 @@ let processNode = async function(key, queue = []) {
 			guess = "chump";*/
 		node.guessOutcomes[guess] = [];
 		let outcomes = enumerateOutcomes(guess, node);
-		let answerOutcomes = [];
 		if (node.guesses===MAX_GUESSES-2)
 			if (process.env.DEBUG) console.log("outcomes", outcomes.length, outcomes);
 		for (let j=0; j<outcomes.length; j++) {
@@ -98,20 +97,11 @@ let processNode = async function(key, queue = []) {
 				continue;
 			}
 			node.guessOutcomes[guess].push(createNode(outcomes[j], node.guesses+1));
-			answerOutcomes.push(...validAnswers);
 		}
 		if (outcomes.length===0) {
 			continue;
 		}
 		console.log(node.guesses, guess, outcomes.length, `${i+1}/${answers.length}`, queue.length, node.validAnswersRegex, key);
-		if (new Set(answerOutcomes).size !== answers.length) {
-			console.log("answers don't match (previous answers, new outcomes set)", guess, answers.length, new Set(answerOutcomes).size);
-			let {guessOutcomes, ...loggable} = node;
-			console.log(loggable);
-			console.log(constructAnswersRegex(node));
-			console.log(constructGuessesRegex(node));
-			exit(2);
-		}
 //		queue.unshift(...node.guessOutcomes[guess]);
 /*		if (node.guesses ===0)
 			break;*/
