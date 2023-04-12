@@ -69,19 +69,40 @@ let pruneGuess = async function(node, guess) {
 	}
 }
 
-answersCache.put(".....", answers, function() {
-	processedCache.clear(async (error) => {
+async function drainQueue() {
+	while (queue.length > 0) {
+		let node = queue.shift();
+		await processNode(node, queue);
+		queue = [...new Set(queue)];
+		await processedCache.put("queue", queue);
+	}
+	console.log("done");
+	await processedCache.clear(async (error) => {
 		if (error) {
 			console.log('processed clear error', error);
 			return;
 		}
-		while (queue.length > 0) {
-			let node = queue.shift();
-			await processNode(node, queue);
-			queue = [...new Set(queue)];
-		}
-		console.log("done");
+		else
+			console.log("cleared process queue");
 	});
+}
+
+processedCache.get("queue", async (error, cachedQueue) => {
+	if (error) {
+		await answersCache.put(".....", answers);
+		await processedCache.clear(async (error) => {
+			if (error) {
+				console.log('processed clear error', error);
+				return;
+			}
+			await drainQueue();
+		});
+	}
+	else {
+		queue = cachedQueue.split(",");
+		console.log("found previous queue", queue.length);
+		await drainQueue();
+	}
 });
 
 // Right poistion x....

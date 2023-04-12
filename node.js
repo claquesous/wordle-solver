@@ -102,12 +102,12 @@ let processNode = async function(key, queue = []) {
 			continue;
 		}
 		console.log(node.guesses, guess, outcomes.length, `${i+1}/${answers.length}`, queue.length, node.validAnswersRegex, key);
-//		queue.unshift(...node.guessOutcomes[guess]);
+		queue.unshift(...node.guessOutcomes[guess]);
 /*		if (node.guesses ===0)
 			break;*/
 	}
-	let newOutcomes = Object.values(node.guessOutcomes).flat();
-	queue.unshift(...newOutcomes);
+//	let newOutcomes = Object.values(node.guessOutcomes).flat();
+//	queue.unshift(...newOutcomes);
 	saveNode(node);
 	await processedCache.put(key, true);
 }
@@ -124,6 +124,10 @@ let nodeHeight = async function(key) {
 	for (let i=0; i<answers.length; i++) {
 		let outcomes = node.guessOutcomes[answers[i]];
 		let maxOutcome = 0;
+		if (process.env.DEBUG && !outcomes) {
+			maxOutcome = answers.length;
+			continue;
+		}
 		for (let j=0; j<outcomes.length; j++) {
 			let outcomeHeight = await nodeHeight(outcomes[j]);
 			if (outcomeHeight > maxOutcome) {
