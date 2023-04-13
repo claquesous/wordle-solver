@@ -2,11 +2,8 @@ const fs = require("fs");
 
 const { createNode, saveNode, processNode } = require('./node');
 const { answersCache, processedCache } = require('./cache');
-
-let guesses = fs.readFileSync("words.txt", "utf8").split("\n");
-guesses.pop();
-let answers = fs.readFileSync("answers.txt", "utf8").split("\n");
-answers.pop();
+const { answers } = require('./answers');
+const { guesses } = require('./guesses');
 
 let queue = [];
 
@@ -73,7 +70,6 @@ async function drainQueue() {
 	while (queue.length > 0) {
 		let node = queue.shift();
 		await processNode(node, queue);
-		queue = [...new Set(queue)];
 		await processedCache.put("queue", queue);
 	}
 	console.log("done");
