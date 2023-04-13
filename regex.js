@@ -34,6 +34,33 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 			knownCount++;
 		}
 	}
+	let found;
+	do {
+		found = false;
+		let misplacedLetters = [...new Set(misplaced.flat())];
+		misplacedLetters.forEach((letter) => {
+			const mysteryCount = counts[letter]-(knownCounts[letter] || 0);
+			let options = 5;
+			for (let i=0; i<5; i++) {
+				if (!!known[i] || misplaced[i].includes(letter))
+					options--;
+			}
+			if (mysteryCount === options) {
+				found = true;
+				for (let i=0; i<5; i++) {
+					let index = misplaced[i].indexOf(letter);
+					if (!known[i] && index < 0) {
+						knownArray[i] = known[i] = letter;
+						knownCounts[known[i]] = (knownCounts[known[i]] || 0) + 1;
+						knownCount++;
+					}
+					else if (index >= 0) {
+						misplaced[i].splice(index,1);
+					}
+				}
+			}
+		});
+	} while (found);
 	for (let i=0; i<5; i++) {
 		let mysteryLetters = misplaced[i].sort().filter((letter) => {
 			if (missing.includes(letter) && knownCounts[letter] === counts[letter]) {
@@ -58,7 +85,8 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	});
 	if (missing.length > 0 && totalCount <5) {
 		let filtered = missing.filter((x)=>{return !counts[x]});
-		regex = regex.concat(`(?<!([${[...new Set(filtered.sort())].join("")}].*))`);
+		if (filtered.length > 0)
+			regex = regex.concat(`(?<!([${[...new Set(filtered.sort())].join("")}].*))`);
 	}
 	return regex;
 };
