@@ -1,4 +1,4 @@
-let validOutcome = function({known, misplaced, missing, counts}) {
+let validOutcome = function({known, misplaced, counts}) {
 	const knownCount = known.filter((x) => {return !!x}).length;
 	const minimumMisplacedCount = new Set(misplaced.reduce((arr,x) => {return arr.concat(x)}, [])).size;
 	if (Object.keys(counts).reduce((sum,letter) => {return sum+counts[letter];}, 0)>5 ) {
@@ -31,19 +31,11 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 				case 0:
 					node.known[j] = letter;
 					node.misplaced[j] = [];
-					node.counts[letter] = !node.counts[letter] ? 1 : node.counts[letter]+1;
-					if (!!known[j] && node.known[j] !== known[j]){
-						if (process.env.DEBUG) console.log("invalid known", j, node.known[j], known[j]);
-						valid = false;
-					}
+					node.counts[letter] = (node.counts[letter] || 0) +1;
 					break;
 				case 1:
 					node.misplaced[j].push(letter);
-					node.counts[letter] = !node.counts[letter] ? 1 : node.counts[letter]+1;
-					if (!!known[j]) {
-						if (process.env.DEBUG) console.log("invalid misplaced", j, known[j]);
-						valid = false;
-					}
+					node.counts[letter] = (node.counts[letter] || 0) +1;
 					break;
 				case 2:
 					node.missing.push(letter);
@@ -77,7 +69,9 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 				if (node.known[j] || known[j]) {
 					node.known[j] = node.known[j] || known[j];
 				}
-				node.misplaced[j] = [...new Set(node.misplaced[j].concat(misplaced[j]).sort())]; 
+				else {
+					node.misplaced[j] = [...new Set(node.misplaced[j].concat(misplaced[j]).sort())];
+				}
 			}
 			node.missing = [...new Set(node.missing.concat(missing).sort())];
 			Object.keys(counts).forEach((letter) => {
@@ -92,3 +86,4 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 }
 
 module.exports = { enumerateOutcomes };
+
