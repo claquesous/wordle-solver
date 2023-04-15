@@ -94,5 +94,10 @@ describe('constructAnswersRegex', () => {
     expect(answer).toBe("a....(?<=([^a].*){4})")
   })
 
+  it ('ignores missing when no valid answers would match', () => {
+    let answer = constructAnswersRegex({known:[null,'i','g','h','t'], misplaced: [[],[],[],[],[]], missing: ['a','b','c','d','e','f'], counts: {i:1,g:1,h:1,t:1}})
+    expect(answer).toBe(".ight(?<!([ef].*))")
+  })
+
 })
 

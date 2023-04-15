@@ -87,12 +87,25 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 		}
 	});
 	if (missing.length > 0 && totalCount <5) {
-		let filtered = missing.filter((x)=>{return !counts[x]});
+		const beforeAnswers = applyRegex(regex);
+		let filtered = missing.filter((x) => {
+			if (totalCount > 2) {
+				const afterAnswers = applyRegex(regex.concat(`(?<!([${x}].*))`), beforeAnswers);
+				if (afterAnswers.length === beforeAnswers.length)
+					return false;
+			}
+			return !counts[x];
+		});
 		if (filtered.length > 0)
 			regex = regex.concat(`(?<!([${[...new Set(filtered.sort())].join("")}].*))`);
 	}
 	return regex;
 };
+
+let applyRegex = function(regex, answerList = answers) {
+	const re = new RegExp(regex);
+	return answerList.filter(w => !!w.match(re));
+}
 
 let getMatchingAnswers = async function(regex, answerList = answers) {
 	let matchingAnswers;
@@ -102,8 +115,7 @@ let getMatchingAnswers = async function(regex, answerList = answers) {
 		if (matchingAnswers[0] === '')
 			matchingAnswers = [];
 	} catch (NotFoundError) {
-		const re = new RegExp(regex);
-		matchingAnswers = answerList.filter(w => !!w.match(re));
+		matchingAnswers = applyRegex(regex, answerList);
 		await answersCache.put(regex, matchingAnswers);
 	}
 	return matchingAnswers;
