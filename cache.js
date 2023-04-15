@@ -1,6 +1,6 @@
 import level from 'level-rocksdb';
 
-let answersCache = level("./answerscache.js");
+let answersCache = level("./answerscache");
 //let guessesCache = {".....": guesses};
 let processedCache = level("./processedcache");
 

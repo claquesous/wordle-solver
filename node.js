@@ -1,8 +1,8 @@
 import fs from 'fs';
 
 import { enumerateOutcomes } from './outcomes.js';
-import { constructGuessesRegex, constructAnswersRegex, regexToHash } from './regex.js';
-import { answersCache, processedCache } from './cache.js';
+import { constructGuessesRegex, constructAnswersRegex, getMatchingAnswers, regexToHash } from './regex.js';
+import { processedCache } from './cache.js';
 
 const MAX_GUESSES = 6;
 
@@ -63,7 +63,7 @@ let processNode = async function(key, queue = []) {
 	}
 
 	node.guessOutcomes = {};
-	const answers = await getAnswers(node);
+	const answers = await getMatchingAnswers(node.validAnswersRegex);
 	if (answers.length <= 1) {
 	//	if (answers.length !== (MAX_GUESSES-node.guesses))
 	//		console.log("prune winner: plenty of guesses", MAX_GUESSES-node.guesses, answers.length);
@@ -82,15 +82,7 @@ let processNode = async function(key, queue = []) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
 			let guessRegex = constructGuessesRegex(outcomes[j]);
 			//let validGuesses = guessesCache[guessRegex] ||= guesses.filter((w) => { return !!w.match(new RegExp(guessRegex))});
-			let validAnswers;
-			try {
-				let cachedAnswers = await answersCache.get(answerRegex);
-				validAnswers = cachedAnswers.split(",");
-			} catch (NotFoundError) {
-				validAnswers = answers.filter((w) => { return !!w.match(new RegExp(answerRegex))});
-				if (validAnswers.length > 0)
-					await answersCache.put(answerRegex, validAnswers);
-			}
+			let validAnswers = await getMatchingAnswers(answerRegex, answers);
 			if (validAnswers.length === 0){
 				if (process.env.DEBUG) console.log("no valid answers", guessRegex, guesses, outcomes[j]);
 				outcomes.splice(j--, 1);
@@ -115,7 +107,7 @@ let processNode = async function(key, queue = []) {
 let nodeHeight = async function(key) {
 	let node = JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
 
-	const answers = await getAnswers(node);
+	const answers = await getMatchingAnswers(node.validAnswersRegex);
 
 	if (answers.length <=2) {
 		return answers.length;
@@ -143,10 +135,5 @@ let nodeHeight = async function(key) {
 	return minHeight;
 }
 
-let getAnswers = async function(node) {
-	const answersString = await answersCache.get(node.validAnswersRegex);
-	return answersString.split(",");
-}
-
-export { createNode, saveNode, processNode, nodeExists, nodeHeight, getAnswers };
+export { createNode, saveNode, processNode, nodeExists, nodeHeight };
 

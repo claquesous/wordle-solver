@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { vi, describe, it, expect } from 'vitest'
+import { constructAnswersRegex } from '../regex.js'
 
-import { constructAnswersRegex } from '../regex';
+vi.mock('../cache.js', () => { return {}; } )
 
 describe('constructAnswersRegex', () => {
   it ('handles default', () => {

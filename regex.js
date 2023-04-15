@@ -1,5 +1,8 @@
 import crypto from 'crypto';
 
+import { answers } from './answers.js';
+import { answersCache } from './cache.js';
+
 let constructGuessesRegex = function({known, misplaced, counts}) {
 	let knownArray = [".",".",".",".","."];
 	let knownCounts = {};
@@ -91,11 +94,26 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	return regex;
 };
 
+let getMatchingAnswers = async function(regex, answerList = answers) {
+	let matchingAnswers;
+	try {
+		let cachedAnswers = await answersCache.get(regex);
+		matchingAnswers = cachedAnswers.split(",");
+		if (matchingAnswers[0] === '')
+			matchingAnswers = [];
+	} catch (NotFoundError) {
+		const re = new RegExp(regex);
+		matchingAnswers = answerList.filter(w => !!w.match(re));
+		await answersCache.put(regex, matchingAnswers);
+	}
+	return matchingAnswers;
+}
+
 const regexToHash = function(regex) {
 	const hash = crypto.createHash('sha1');
 	hash.update(regex);
 	return hash.digest('hex');
 }
 
-export { constructGuessesRegex, constructAnswersRegex, regexToHash };
+export { constructGuessesRegex, constructAnswersRegex, getMatchingAnswers, regexToHash };
 

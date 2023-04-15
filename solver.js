@@ -1,9 +1,10 @@
 import fs from "fs";
 
 import { createNode, saveNode, processNode } from './node.js';
-import { answersCache, processedCache } from './cache.js';
+import { processedCache } from './cache.js';
 import { answers } from './answers.js';
 import { guesses } from './guesses.js';
+import { getMatchingAnswers } from './regex.js';
 
 let queue = [];
 
@@ -33,8 +34,7 @@ let pruneGuess = async function(node, guess) {
 		let outcome = node.guessOutcomes[guess][i];
 		if (outcome.result === true) {
 			let oldSize = answerSet.size;
-			let cachedAnswers = await answersCache.get(outcome.validAnswersRegex);
-			let answers = cachedAnswers.split(",");
+			let answers = await getMatchingAnswers(outcome.validAnswersRegex);
 			answerSet = new Set([...answerSet, ...answers]);
 			console.log("prune: winner adding", guess, oldSize, answerSet.size);
 		}
@@ -48,10 +48,9 @@ let pruneGuess = async function(node, guess) {
 		}
 	}
 	if (complete) {
-		let cachedAnswers = await answersCache.get(node.validAnswersRegex);
-		let answers = cachedAnswers.split(",");
+		let answers = await getMatchingAnswers(node.validAnswersRegex);
 		if (answerSet.size !== answers.length || node.guessOutcomes[guess].length ===0) {
-			console.log("prune: delete guess", guess, node.guesses, node.guessOutcomes[guess].length, answerSet.size, answersCache[node.validAnswersRegex].length);
+			console.log("prune: delete guess", guess, node.guesses, node.guessOutcomes[guess].length, answerSet.size);
 			delete node.guessOutcomes[guess];
 			if (Object.keys(node.guessOutcomes).length===0) {
 				console.log("prune node", node.guesses, guessed(node));
@@ -85,7 +84,6 @@ async function drainQueue() {
 
 processedCache.get("queue", async (error, cachedQueue) => {
 	if (error) {
-		await answersCache.put(".....", answers);
 		await processedCache.clear(async (error) => {
 			if (error) {
 				console.log('processed clear error', error);

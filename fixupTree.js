@@ -1,7 +1,7 @@
 import fs from 'fs';
 
-import { constructAnswersRegex, regexToHash } from './regex.js';
-import { processNode, nodeExists, getAnswers } from './node.js';
+import { constructAnswersRegex, getMatchingAnswers, regexToHash } from './regex.js';
+import { processNode, nodeExists } from './node.js';
 
 if (!fs.existsSync('./solve')) {
 	console.log("No solve directory");
@@ -55,7 +55,7 @@ let validateTree = async function() {
 		let keys = Object.keys(nodesArray);
 		keys.forEach(async (key) => {
 			let node = nodesArray[key];
-			const answers = await getAnswers(node);
+			const answers = await getMatchingAnswers(node.validAnswersRegex);
 
 			if (!node.guessOutcomes){
 				await processNode(key, queue);
