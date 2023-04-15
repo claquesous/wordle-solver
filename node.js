@@ -3,8 +3,6 @@ import fs from 'fs';
 import { enumerateOutcomes } from './outcomes.js';
 import { constructGuessesRegex, constructAnswersRegex, getMatchingAnswers, regexToHash } from './regex.js';
 
-const MAX_GUESSES = 6;
-
 let createNode = function(outcome, guesses) {
 	let node = {...outcome};
 	node.validGuessesRegex = constructGuessesRegex(outcome);
@@ -52,24 +50,17 @@ let saveNode = function(node) {
 
 let processNode = async function(key, queue = []) {
 	let node = JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
-//	if (node.hasOwnProperty('guessOutcomes'))
-//		return;
-	node.guessOutcomes = {};
 	const answers = await getMatchingAnswers(node.validAnswersRegex);
 	if (answers.length <= 1) {
-	//	if (answers.length !== (MAX_GUESSES-node.guesses))
-	//		console.log("prune winner: plenty of guesses", MAX_GUESSES-node.guesses, answers.length);
-	//	setResult(node, true);
 		return;
 	}
+	node.guessOutcomes = {};
 	for (let i=0; i<answers.length; i++) {
 		let guess = answers[i];
 /*		if (node.guesses===0)
 			guess = "chump";*/
 		node.guessOutcomes[guess] = [];
 		let outcomes = enumerateOutcomes(guess, node);
-		if (node.guesses===MAX_GUESSES-2)
-			if (process.env.DEBUG) console.log("outcomes", outcomes.length, outcomes);
 		for (let j=0; j<outcomes.length; j++) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
 			let guessRegex = constructGuessesRegex(outcomes[j]);
@@ -126,5 +117,5 @@ let nodeHeight = async function(key) {
 	return minHeight;
 }
 
-export { createNode, saveNode, processNode, nodeExists, nodeHeight };
+export { createNode, processNode, nodeExists, nodeHeight };
 
