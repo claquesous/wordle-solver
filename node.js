@@ -1,8 +1,8 @@
-const fs = require('fs');
+import fs from 'fs';
 
-const { enumerateOutcomes } = require('./outcomes');
-const { constructGuessesRegex, constructAnswersRegex, regexToHash } = require('./regex');
-const { answersCache, processedCache } = require('./cache');
+import { enumerateOutcomes } from './outcomes.js';
+import { constructGuessesRegex, constructAnswersRegex, regexToHash } from './regex.js';
+import { answersCache, processedCache } from './cache.js';
 
 const MAX_GUESSES = 6;
 
@@ -148,5 +148,5 @@ let getAnswers = async function(node) {
 	return answersString.split(",");
 }
 
-module.exports = { createNode, saveNode, processNode, nodeExists, nodeHeight, getAnswers };
+export { createNode, saveNode, processNode, nodeExists, nodeHeight, getAnswers };
 

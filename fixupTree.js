@@ -1,7 +1,7 @@
-const fs = require('fs');
+import fs from 'fs';
 
-const { constructAnswersRegex, regexToHash } = require('./regex');
-const { processNode, nodeExists, getAnswers } = require('./node');
+import { constructAnswersRegex, regexToHash } from './regex.js';
+import { processNode, nodeExists, getAnswers } from './node.js';
 
 if (!fs.existsSync('./solve')) {
 	console.log("No solve directory");

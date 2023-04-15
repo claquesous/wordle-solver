@@ -5,6 +5,7 @@
   "main": "solver.js",
   "author": "Geoff Crew",
   "license": "MIT",
+  "type": "module",
   "dependencies": {
     "level-rocksdb": "^5.0.0"
   },

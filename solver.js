@@ -1,9 +1,9 @@
-const fs = require("fs");
+import fs from "fs";
 
-const { createNode, saveNode, processNode } = require('./node');
-const { answersCache, processedCache } = require('./cache');
-const { answers } = require('./answers');
-const { guesses } = require('./guesses');
+import { createNode, saveNode, processNode } from './node.js';
+import { answersCache, processedCache } from './cache.js';
+import { answers } from './answers.js';
+import { guesses } from './guesses.js';
 
 let queue = [];
 

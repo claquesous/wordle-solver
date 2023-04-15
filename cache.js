@@ -1,7 +1,8 @@
-const level = require('level-rocksdb');
-let answersCache = level("./answerscache");
+import level from 'level-rocksdb';
+
+let answersCache = level("./answerscache.js");
 //let guessesCache = {".....": guesses};
 let processedCache = level("./processedcache");
 
-module.exports = { answersCache, processedCache };
+export { answersCache, processedCache };
 

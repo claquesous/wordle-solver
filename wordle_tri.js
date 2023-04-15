@@ -1,4 +1,4 @@
-const fs = require("fs");
+import fs from "fs";
 
 let words = fs.readFileSync("answers.txt", "utf8").split("\n");
 words.pop();

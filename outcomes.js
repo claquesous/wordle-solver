@@ -85,5 +85,5 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 	return outcomes.filter(validOutcome);
 }
 
-module.exports = { enumerateOutcomes };
+export { enumerateOutcomes };
 

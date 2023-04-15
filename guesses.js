@@ -1,6 +1,7 @@
-const { readFileSync } = require("fs");
+import { readFileSync } from "fs";
 
 let guesses = readFileSync("words.txt", "utf8").split("\n");
 guesses.pop();
 
-module.exports = { guesses };
+export { guesses };
+
