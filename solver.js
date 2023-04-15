@@ -67,9 +67,15 @@ let pruneGuess = async function(node, guess) {
 
 async function drainQueue() {
 	while (queue.length > 0) {
-		let node = queue.shift();
-		await processNode(node, queue);
-		await processedCache.put("queue", queue);
+		let key = queue.shift();
+		try {
+			let cached = await processedCache.get(key);
+		} catch (NotFoundError) {
+			await processNode(key, queue);
+			await processedCache.put(key, true);
+			await processedCache.put("queue", queue);
+		}
+
 	}
 	console.log("done");
 	await processedCache.clear(async (error) => {
