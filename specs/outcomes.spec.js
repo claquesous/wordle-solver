@@ -3,14 +3,14 @@ import { describe, it, expect } from 'vitest';
 import { enumerateOutcomes } from '../outcomes';
 
 describe('enumerateOutcomes', () => {
-  it ('returns all outcomes when nothing is known', () => {
+  it ('returns all outcomes (except 4 known and one misplaced) when nothing is known', () => {
     let outcomes = enumerateOutcomes('aback', {known:[], misplaced: [[],[],[],[],[]], missing: [], counts: {}})
-    expect(outcomes).toHaveLength(243)
+    expect(outcomes).toHaveLength(238)
   })
 
-  it ('cuts outcomes in third when a letter is known', () => {
+  it ('cuts outcomes in about a third when a letter is known', () => {
     let outcomes = enumerateOutcomes('aback', {known:['a'], misplaced: [[],[],[],[],[]], missing: [], counts: {a: 1}})
-    expect(outcomes).toHaveLength(81)
+    expect(outcomes).toHaveLength(77)
   })
 
   it ('cuts missing letters', () => {
@@ -52,6 +52,12 @@ describe('enumerateOutcomes', () => {
     let outcomes = enumerateOutcomes('aback', {known:['a','b','a'], misplaced: [ [], [], [], [], ['c'] ], missing: [], counts: {a:2,b:1,c:1}})
     let allMissing = outcomes.map(o => o.missing).flat()
     expect(allMissing).not.toContain('c')
+  })
+
+  it ('cuts outcomes with four known and one misplaced', () => {
+    let outcomes = enumerateOutcomes('aback', {known:[], misplaced: [ [], [], [], [], [] ], missing: [], counts: {}})
+    let counts = outcomes.map(o => (o.known.filter(x=>x).length===4 && o.misplaced.flat().length===1))
+    expect(counts).not.toContain(true)
   })
 
 })

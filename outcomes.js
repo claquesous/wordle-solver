@@ -46,6 +46,8 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 					break;
 			}
 		}
+		if (node.known.filter(x=>x).length === 4 && node.misplaced.flat().length === 1)
+			continue;
 		Object.keys(counts).forEach((letter) => {
 			let count = 0;
 			for (let j=0; j<5; j++) {
