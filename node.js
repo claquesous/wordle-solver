@@ -73,9 +73,6 @@ let processNode = async function(key, queue = []) {
 			}
 			node.guessOutcomes[guess].push(createNode(outcomes[j], node.guesses+1));
 		}
-		if (outcomes.length===0) {
-			continue;
-		}
 		console.log(node.guesses, guess, outcomes.length, `${i+1}/${answers.length}`, queue.length, node.validAnswersRegex, key);
 		queue.unshift(...node.guessOutcomes[guess]);
 /*		if (node.guesses ===0)
