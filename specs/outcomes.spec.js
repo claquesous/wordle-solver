@@ -4,17 +4,17 @@ import { enumerateOutcomes } from '../outcomes';
 
 describe('enumerateOutcomes', () => {
   it ('returns all outcomes (except 4 known and one misplaced) when nothing is known', () => {
-    let outcomes = enumerateOutcomes('aback', {known:[], misplaced: [[],[],[],[],[]], missing: [], counts: {}})
+    let outcomes = enumerateOutcomes('abhor', {known:[], misplaced: [[],[],[],[],[]], missing: [], counts: {}})
     expect(outcomes).toHaveLength(238)
   })
 
   it ('cuts outcomes in about a third when a letter is known', () => {
-    let outcomes = enumerateOutcomes('aback', {known:['a'], misplaced: [[],[],[],[],[]], missing: [], counts: {a: 1}})
+    let outcomes = enumerateOutcomes('abhor', {known:['a'], misplaced: [[],[],[],[],[]], missing: [], counts: {a: 1}})
     expect(outcomes).toHaveLength(77)
   })
 
   it ('cuts missing letters', () => {
-    let outcomes = enumerateOutcomes('aback', {known:[], misplaced: [[],[],[],[],[]], missing: ['b'], counts: {}})
+    let outcomes = enumerateOutcomes('abhor', {known:[], misplaced: [[],[],[],[],[]], missing: ['b'], counts: {}})
     expect(outcomes).toHaveLength(81)
   })
 
@@ -58,6 +58,31 @@ describe('enumerateOutcomes', () => {
     let outcomes = enumerateOutcomes('aback', {known:[], misplaced: [ [], [], [], [], [] ], missing: [], counts: {}})
     let counts = outcomes.map(o => (o.known.filter(x=>x).length===4 && o.misplaced.flat().length===1))
     expect(counts).not.toContain(true)
+  })
+
+  it ('cuts outcomes where a missing letter is later misplaced', () => {
+    let outcomes = enumerateOutcomes('aback', {known:[], misplaced: [ [], [], [], [], [] ], missing: [], counts: {}})
+    expect(outcomes).not.toContainEqual({known:[], misplaced: [ [], [], ['a'], [], [] ], missing: ['a','b','c','k'], counts: {a:1}})
+  })
+
+  it ('sets misplaced for a double letter with one count', () => {
+    let outcomes = enumerateOutcomes('aback', {known:[], misplaced: [ [], [], [], [], [] ], missing: [], counts: {}})
+    expect(outcomes).toContainEqual({known:[], misplaced: [ ['a'], [], ['a'], [], [] ], missing: ['a','b','c','k'], counts: {a:1}})
+  })
+
+  it ('does not set missing for a double letter with two count', () => {
+    let outcomes = enumerateOutcomes('aback', {known:[], misplaced: [ [], [], [], [], [] ], missing: [], counts: {}})
+    expect(outcomes).toContainEqual({known:[], misplaced: [ ['a'], [], ['a'], [], [] ], missing: ['b','c','k'], counts: {a:2}})
+  })
+
+  it ('returns limited outcomes for the only 2 letters word', () => {
+    let outcomes = enumerateOutcomes('mamma', {known:[], misplaced: [[],[],[],[],[]], missing: [], counts: {}})
+    expect(outcomes).toHaveLength(155)
+  })
+
+  it ('sets misplaced for a triple letter with two count', () => {
+    let outcomes = enumerateOutcomes('mummy', {known:[], misplaced: [ [], [], [], [], [] ], missing: [], counts: {}})
+    expect(outcomes).toContainEqual({known:[], misplaced: [ ['m'], [], ['m'], ['m'], [] ], missing: ['m','u','y'], counts: {m:2}})
   })
 
 })

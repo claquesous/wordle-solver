@@ -36,9 +36,16 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 				case 1:
 					node.misplaced[j].push(letter);
 					node.counts[letter] = (node.counts[letter] || 0) +1;
+					if (node.missing.includes(letter)) {
+						if (process.env.DEBUG) console.log("was missing now misplaced", j, letter, word);
+						valid = false;
+					}
 					break;
 				case 2:
 					node.missing.push(letter);
+					if (node.misplaced.flat().includes(letter)) {
+						node.misplaced[j].push(letter);
+					}
 					if (!!known[j]) {
 						if (process.env.DEBUG) console.log("invalid missing", j, known[j]);
 						valid = false;
