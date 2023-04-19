@@ -89,7 +89,7 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	if (missing.length > 0 && totalCount <5) {
 		const beforeAnswers = applyRegex(regex);
 		let filtered = missing.filter((x) => {
-			if (totalCount > 2) {
+			if (totalCount > 1) {
 				const afterAnswers = applyRegex(regex.concat(`(?<!([${x}].*))`), beforeAnswers);
 				if (afterAnswers.length === beforeAnswers.length)
 					return false;
