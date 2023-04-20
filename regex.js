@@ -68,6 +68,12 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	} while (found);
 	for (let i=0; i<5; i++) {
 		let mysteryLetters = misplaced[i].sort().filter((letter) => {
+			const testKnown = [...knownArray];
+			testKnown[i] = `[^${letter}]`;
+			const beforeAnswers = applyRegex(knownArray.join(""));
+			const afterAnswers = applyRegex(testKnown.join(""), beforeAnswers);
+			if (afterAnswers.length === beforeAnswers.length)
+				return false;
 			return !missing.includes(letter) || knownCounts[letter] !== counts[letter];
 		});
 		if (!known[i] && (mysteryLetters.length > 0)) {

@@ -50,13 +50,13 @@ describe('constructAnswersRegex', () => {
   })
 
   it ('ensures minimum counts when a letter is known', () => {
-    let answer = constructAnswersRegex({known:['a'], misplaced: [[],['a'],[],[],[]], missing: [], counts: {a: 2}})
-    expect(answer).toBe("a[^a]...(?<=(a.*){2})")
+    let answer = constructAnswersRegex({known:['m'], misplaced: [[],[],[],['m'],[]], missing: [], counts: {m: 2}})
+    expect(answer).toBe("m..[^m].(?<=(m.*){2})")
   })
 
   it ('ensures exact counts when a letter is missing', () => {
-    let answer = constructAnswersRegex({known:['m'], misplaced: [[],['m'],[],[],[]], missing: ['m'], counts: {m: 2}})
-    expect(answer).toBe("m[^m]...(?<=(m.*){2})(?<=([^m].*){3})")
+    let answer = constructAnswersRegex({known:['e'], misplaced: [[],[],['e'],[],[]], missing: ['e'], counts: {e: 2}})
+    expect(answer).toBe("e.[^e]..(?<=(e.*){2})(?<=([^e].*){3})")
   })
 
   it ('ignores missing if all letters known', () => {
@@ -75,8 +75,8 @@ describe('constructAnswersRegex', () => {
   })
 
   it ('does not place misplaced letters when options exists', () => {
-    let answer = constructAnswersRegex({known:['a',null,null,'c'], misplaced: [[],[],[],[],['a']], missing: [], counts: {a: 2, c: 1 }})
-    expect(answer).toBe("a..c[^a](?<=(a.*){2})")
+    let answer = constructAnswersRegex({known:['a','l',null], misplaced: [[],[],[],[],['a']], missing: [], counts: {a: 2, l: 1 }})
+    expect(answer).toBe("al..[^a](?<=(a.*){2})")
   })
 
   it ('ignores misplaced letters if all accounted for', () => {
@@ -107,6 +107,11 @@ describe('constructAnswersRegex', () => {
   it ('handles misplaced letters that are doubled up', () => {
     let answer = constructAnswersRegex({known:[null,'i','g','h','t'], misplaced: [['t'],[],[],[],[]], missing: [], counts: {i:1,g:1,h:1,t:1}})
     expect(answer).toBe("[^t]ight")
+  })
+
+  it ('ignores misplaced letters when no valid answers would match', () => {
+    let answer = constructAnswersRegex({known:['a','b','a','c'], misplaced: [[],[],[],[],['a']], missing: [], counts: {a:2,b:1,c:1}})
+    expect(answer).toBe("abac.")
   })
 
 })
