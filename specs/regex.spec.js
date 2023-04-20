@@ -55,8 +55,8 @@ describe('constructAnswersRegex', () => {
   })
 
   it ('ensures exact counts when a letter is missing', () => {
-    let answer = constructAnswersRegex({known:['a'], misplaced: [[],['a'],[],[],[]], missing: ['a'], counts: {a: 2}})
-    expect(answer).toBe("a[^a]...(?<=(a.*){2})(?<=([^a].*){3})")
+    let answer = constructAnswersRegex({known:['m'], misplaced: [[],['m'],[],[],[]], missing: ['m'], counts: {m: 2}})
+    expect(answer).toBe("m[^m]...(?<=(m.*){2})(?<=([^m].*){3})")
   })
 
   it ('ignores missing if all letters known', () => {
@@ -97,6 +97,16 @@ describe('constructAnswersRegex', () => {
   it ('ignores missing when no valid answers would match', () => {
     let answer = constructAnswersRegex({known:[null,'i','g','h','t'], misplaced: [[],[],[],[],[]], missing: ['a','b','c','d','e','f'], counts: {i:1,g:1,h:1,t:1}})
     expect(answer).toBe(".ight(?<!([ef].*))")
+  })
+
+  it ('ignores count limitation when no valid answers would match', () => {
+    let answer = constructAnswersRegex({known:[null,'i','g','h','t'], misplaced: [['h','i'],[],[],[],[]], missing: ['a','b','c','d','e','f','h','i'], counts: {i:1,g:1,h:1,t:1}})
+    expect(answer).toBe(".ight(?<!([ef].*))")
+  })
+
+  it ('handles misplaced letters that are doubled up', () => {
+    let answer = constructAnswersRegex({known:[null,'i','g','h','t'], misplaced: [['t'],[],[],[],[]], missing: [], counts: {i:1,g:1,h:1,t:1}})
+    expect(answer).toBe("[^t]ight")
   })
 
 })

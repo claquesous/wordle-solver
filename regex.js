@@ -41,8 +41,10 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	do {
 		found = false;
 		let misplacedLetters = [...new Set(misplaced.flat())];
-		misplacedLetters.forEach((letter) => {
+		for (const letter of misplacedLetters) {
 			const mysteryCount = counts[letter]-(knownCounts[letter] || 0);
+			if (mysteryCount === 0)
+				continue;
 			let options = 5;
 			for (let i=0; i<5; i++) {
 				if (!!known[i] || misplaced[i].includes(letter))
@@ -62,14 +64,11 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 					}
 				}
 			}
-		});
+		}
 	} while (found);
 	for (let i=0; i<5; i++) {
 		let mysteryLetters = misplaced[i].sort().filter((letter) => {
-			if (missing.includes(letter) && knownCounts[letter] === counts[letter]) {
-				return false;
-			}
-			return true;
+			return !missing.includes(letter) || knownCounts[letter] !== counts[letter];
 		});
 		if (!known[i] && (mysteryLetters.length > 0)) {
 			knownArray[i] = `[^${mysteryLetters.join("")}]`;
@@ -83,7 +82,10 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 			regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
 		}
 		if (missing.includes(letter)) {
-			regex = regex.concat(`(?<=([^${letter}].*){${5-counts[letter]}})`);
+			const beforeAnswers = applyRegex(regex);
+			const afterAnswers = applyRegex(regex.concat(`(?<=([^${letter}].*){${5-counts[letter]}})`), beforeAnswers);
+			if (afterAnswers.length !== beforeAnswers.length)
+				regex = regex.concat(`(?<=([^${letter}].*){${5-counts[letter]}})`);
 		}
 	});
 	if (missing.length > 0 && totalCount <5) {
