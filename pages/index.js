@@ -1,13 +1,13 @@
-import Guess from '../components/Guess.js'
+import Word from '../components/Word.js'
 
 function HomePage() {
   return <div>
-	<Guess />
-	<Guess />
-	<Guess />
-	<Guess />
-	<Guess />
-	<Guess />
+	<Word />
+	<Word />
+	<Word />
+	<Word />
+	<Word />
+	<Word />
   </div>
 }
 
