@@ -57,17 +57,13 @@ let processNode = async function(key, queue = []) {
 	node.guessOutcomes = {};
 	for (let i=0; i<answers.length; i++) {
 		let guess = answers[i];
-/*		if (node.guesses===0)
-			guess = "chump";*/
 		node.guessOutcomes[guess] = [];
 		let outcomes = enumerateOutcomes(guess, node);
 		for (let j=0; j<outcomes.length; j++) {
 			let answerRegex = constructAnswersRegex(outcomes[j]);
-			let guessRegex = constructGuessesRegex(outcomes[j]);
-			//let validGuesses = guessesCache[guessRegex] ||= guesses.filter((w) => { return !!w.match(new RegExp(guessRegex))});
 			let validAnswers = await getMatchingAnswers(answerRegex, answers);
 			if (validAnswers.length === 0){
-				if (process.env.DEBUG) console.log("no valid answers", guessRegex, guesses, outcomes[j]);
+				if (process.env.DEBUG) console.log("no valid answers", answerRegex, outcomes[j]);
 				outcomes.splice(j--, 1);
 				continue;
 			}
@@ -75,8 +71,6 @@ let processNode = async function(key, queue = []) {
 		}
 		console.log(node.guesses, guess, outcomes.length, `${i+1}/${answers.length}`, queue.length, node.validAnswersRegex, key);
 		queue.unshift(...node.guessOutcomes[guess]);
-/*		if (node.guesses ===0)
-			break;*/
 	}
 //	let newOutcomes = Object.values(node.guessOutcomes).flat();
 //	queue.unshift(...newOutcomes);
