@@ -1,10 +1,23 @@
 import { useState, useRef, useEffect } from 'react'
+import styles from './Letter.module.css'
 
 export default function Letter({ position, onSetLetter, cursor }) {
   const [value, setValue] = useState('')
   const [outcome, setOutcome] = useState(0)
 
   const cursorReference = useRef(null)
+  let currentStyle
+  switch(outcome) {
+    case 0:
+      currentStyle = styles.missing
+      break
+    case 1:
+      currentStyle = styles.misplaced
+      break
+    case 2:
+      currentStyle = styles.known
+      break
+  }
 
   useEffect(() => {
     if (position === cursor) {
@@ -28,10 +41,13 @@ export default function Letter({ position, onSetLetter, cursor }) {
   }
 
   return (
-      <input type="text" maxLength="1" value={value}
-        onChange={handlePress} onClick={cycleOutcome}
-	ref={cursorReference}
-	pattern="[a-z]"
+      <input className={currentStyle}
+        type="text"
+	maxLength="1"
+	value={value}
+        onChange={handlePress}
+	onClick={cycleOutcome}
+        ref={cursorReference}
       />
   )
 }
