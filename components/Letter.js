@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './Letter.module.css'
 
-export default function Letter({ position, onSetLetter, cursor }) {
+export default function Letter({ position, onSetLetter, onSetResult, cursor }) {
   const [value, setValue] = useState('')
-  const [outcome, setOutcome] = useState(0)
+  const [result, setResult] = useState(0)
 
   const cursorReference = useRef(null)
   let currentStyle
-  switch(outcome) {
+  switch(result) {
     case 0:
       currentStyle = styles.missing
       break
@@ -23,7 +23,7 @@ export default function Letter({ position, onSetLetter, cursor }) {
     if (position === cursor) {
       cursorReference.current.focus()
     }
-  }, [cursor, position])
+  }, [cursor])
 
   function handlePress({ nativeEvent }) {
     const key = nativeEvent.data
@@ -36,17 +36,21 @@ export default function Letter({ position, onSetLetter, cursor }) {
     }
   }
 
-  function cycleOutcome() {
-    setOutcome((outcome+1)%3)
+  function cycleResult() {
+    if (!!value) {
+      const newResult = (result+1)%3
+      setResult(newResult)
+      onSetResult(newResult, value.toLowerCase(), position)
+    }
   }
 
   return (
       <input className={currentStyle}
         type="text"
-	maxLength="1"
-	value={value}
+        maxLength="1"
+        value={value}
         onChange={handlePress}
-	onClick={cycleOutcome}
+        onClick={cycleResult}
         ref={cursorReference}
       />
   )
