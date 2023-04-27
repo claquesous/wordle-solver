@@ -39,8 +39,14 @@ export default function Word() {
     setOutcome(outcome)
   }
 
+  function handleKeyDown(e) {
+    if (e.key === 'Tab') {
+      e.preventDefault()
+    }
+  }
+
   return (
-    <div>
+    <div onKeyDown={ handleKeyDown }>
       <Letter position={ 0 } onSetLetter={ handleLetter } onSetResult={ handleResult } cursor={ cursor } />
       <Letter position={ 1 } onSetLetter={ handleLetter } onSetResult={ handleResult } cursor={ cursor } />
       <Letter position={ 2 } onSetLetter={ handleLetter } onSetResult={ handleResult } cursor={ cursor } />
