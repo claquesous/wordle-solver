@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './Letter.module.css'
 
-export default function Letter({ position, onSetLetter, onSetResult, cursor }) {
+export default function Letter({ position, onSetLetter, onSetResult, onBack, cursor }) {
   const [value, setValue] = useState('')
   const [result, setResult] = useState(0)
 
@@ -22,6 +22,9 @@ export default function Letter({ position, onSetLetter, onSetResult, cursor }) {
   useEffect(() => {
     if (position === cursor) {
       cursorReference.current.focus()
+      cursorReference.current.value = ''
+      setValue('')
+      setResult(0)
     }
   }, [cursor])
 
@@ -36,7 +39,16 @@ export default function Letter({ position, onSetLetter, onSetResult, cursor }) {
     }
   }
 
-  function cycleResult() {
+  function handleBackspace({ nativeEvent }) {
+    if (nativeEvent.key === 'Backspace') {
+      onBack(position, value)
+      setValue('')
+      setResult(0)
+    }
+  }
+
+  function cycleResult(e) {
+    e.preventDefault()
     if (!!value) {
       const newResult = (result+1)%3
       setResult(newResult)
@@ -50,7 +62,8 @@ export default function Letter({ position, onSetLetter, onSetResult, cursor }) {
         maxLength="1"
         value={value}
         onChange={handlePress}
-        onClick={cycleResult}
+        onKeyDown={handleBackspace}
+        onMouseDown={cycleResult}
         ref={cursorReference}
       />
   )
