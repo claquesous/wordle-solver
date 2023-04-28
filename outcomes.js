@@ -14,8 +14,32 @@ let validOutcome = function({known, misplaced, counts}) {
 	return true;
 }
 
-let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
+let mergeOutcomes = function(oldOutcome, newOutcome) {
+	let mergedOutcome = {};
+	mergedOutcome.known = [...newOutcome.known];
+	mergedOutcome.misplaced = [];
+	for (let i=0; i<5; i++) {
+		mergedOutcome.misplaced[i] = [...newOutcome.misplaced[i]];
+		if (newOutcome.known[i] || oldOutcome.known[i]) {
+			mergedOutcome.known[i] = newOutcome.known[i] || oldOutcome.known[i];
+		}
+		else {
+			mergedOutcome.misplaced[i] = [...new Set(newOutcome.misplaced[i].concat(oldOutcome.misplaced[i]).sort())];
+		}
+	}
+	mergedOutcome.missing = [...new Set(newOutcome.missing.concat(oldOutcome.missing).sort())];
+	mergedOutcome.counts = {...newOutcome.counts};
+	Object.keys(oldOutcome.counts).forEach((letter) => {
+		if (!newOutcome.counts[letter] || newOutcome.counts[letter] < oldOutcome.counts[letter]) {
+			mergedOutcome.counts[letter] = oldOutcome.counts[letter];
+		}
+	});
+	return mergedOutcome;
+}
+
+let enumerateOutcomes = function(word, oldOutcome) {
 	let outcomes = [];
+	const { known, misplaced, missing, counts } = oldOutcome;
 	for (let i=0; i<243; i++) {
 		let valid = true;
 		let node = {
@@ -74,25 +98,11 @@ let enumerateOutcomes = function(word, {known, misplaced, missing, counts}) {
 			}
 		});
 		if (valid) {
-			for (let j=0; j<5; j++) {
-				if (node.known[j] || known[j]) {
-					node.known[j] = node.known[j] || known[j];
-				}
-				else {
-					node.misplaced[j] = [...new Set(node.misplaced[j].concat(misplaced[j]).sort())];
-				}
-			}
-			node.missing = [...new Set(node.missing.concat(missing).sort())];
-			Object.keys(counts).forEach((letter) => {
-				if (!node.counts[letter] || node.counts[letter] < counts[letter]) {
-					node.counts[letter] = counts[letter];
-				}
-			});
-			outcomes.push(node);
+			outcomes.push(mergeOutcomes(oldOutcome, node));
 		}
 	}
 	return outcomes.filter(validOutcome);
 }
 
-export { enumerateOutcomes };
+export { mergeOutcomes, enumerateOutcomes };
 
