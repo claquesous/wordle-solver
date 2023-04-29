@@ -34,6 +34,17 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}, answer
 			knownCount++;
 		}
 	}
+	for (const knownLetter of Object.keys(knownCounts)) {
+		if (knownCounts[knownLetter]===counts[knownLetter] && missing.includes(knownLetter)) {
+			missing.splice(missing.indexOf(knownLetter),1);
+			for (let i=0; i<5; i++) {
+				if (!known[i] && !misplaced[i].includes(knownLetter)) {
+					misplaced[i].push(knownLetter);
+					misplaced[i] = [...new Set(misplaced[i])];
+				}
+			}
+		}
+	}
 	let found;
 	do {
 		found = false;

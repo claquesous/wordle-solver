@@ -28,9 +28,9 @@ describe('constructAnswersRegex', () => {
     expect(answer).toBe("[^ab]....")
   })
 
-  it ('ignores misplaced letters if all accounted for', () => {
+  it ('retains and extends misplaced letters if all accounted for', () => {
     let answer = constructAnswersRegex({known:['a'], misplaced: [[],['a'],[],['a'],[]], missing: ['a'], counts: {a: 1}}, answers)
-    expect(answer).toBe("a....(?<=([^a].*){4})")
+    expect(answer).toBe("a.[^a][^a][^a]")
   })
 
   it ('handles missing letters', () => {
@@ -88,9 +88,9 @@ describe('constructAnswersRegex', () => {
     expect(answer).toBe("aback")
   })
 
-  it ('ignores missing when counts are known', () => {
+  it ('leaves off missing matcher when counts are known', () => {
     let answer = constructAnswersRegex({known:['a'], misplaced: [[],[],[],[],[]], missing: ['a'], counts: {a: 1}}, answers)
-    expect(answer).toBe("a....(?<=([^a].*){4})")
+    expect(answer).toBe("a.[^a][^a][^a]")
   })
 
   it ('ignores missing when no valid answers would match', () => {
@@ -116,6 +116,18 @@ describe('constructAnswersRegex', () => {
   it ('still excludes letters that have been placed from former position', () => {
     let answer = constructAnswersRegex({known:[null,'o','o',null,'h'], misplaced: [[],[],[],['t'],[]], missing: ['c','p','s'], counts: {o:2,t:1,h:1}}, answers)
     expect(answer).toBe("too[^t]h")
+  })
+
+  it ('collapses fully accounted letters into misplaced', () => {
+    let first = constructAnswersRegex({known:[null,'o','o','t','h'], misplaced: [['t'],[],[],[],[]], missing: [], counts: {o:2,t:1,h:1}}, answers)
+    let second = constructAnswersRegex({known:[null,'o','o','t','h'], misplaced: [[],[],[],[],[]], missing: ['t'], counts: {o:2,t:1,h:1}}, answers)
+    expect(first).toBe(second)
+  })
+
+  it ('modifies the outcome when collapsing missing into misplaced', () => {
+    let outcome = {known:[null,'o','o','t','h'], misplaced: [[],[],[],[],[]], missing: ['t'], counts: {o:2,t:1,h:1}}
+    let second = constructAnswersRegex(outcome, answers)
+    expect(outcome).toEqual({known:[null,'o','o','t','h'], misplaced: [['t'],[],[],[],[]], missing: [], counts: {o:2,t:1,h:1}})
   })
 
 })
