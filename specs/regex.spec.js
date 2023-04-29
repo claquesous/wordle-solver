@@ -113,5 +113,10 @@ describe('constructAnswersRegex', () => {
     expect(answer).toBe("abac.")
   })
 
+  it ('still excludes letters that have been placed from former position', () => {
+    let answer = constructAnswersRegex({known:[null,'o','o',null,'h'], misplaced: [[],[],[],['t'],[]], missing: ['c','p','s'], counts: {o:2,t:1,h:1}}, answers)
+    expect(answer).toBe("too[^t]h")
+  })
+
 })
 

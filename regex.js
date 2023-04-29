@@ -56,9 +56,6 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}, answer
 						knownCounts[known[i]] = (knownCounts[known[i]] || 0) + 1;
 						knownCount++;
 					}
-					else if (index >= 0) {
-						misplaced[i].splice(index,1);
-					}
 				}
 			}
 		}
