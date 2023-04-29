@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Word from '../components/Word.js'
+import GuessList from '../components/GuessList.js'
 import { mergeOutcomes } from '../outcomes.js'
 import { answers } from '../answers.js'
 import { constructAnswersRegex, applyRegex, regexToHash } from '../regex.js'
@@ -15,16 +16,13 @@ function HomePage({ answers }) {
   })
   const regexString = constructAnswersRegex(mergedOutcome, answers)
   const [node, setNode] = useState({})
-  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const hash = regexToHash(regexString)
     const file = hash.substring( hash.length -5 )
-    setLoading(true)
     fetch(`/solve/${file}.json`).then(res => res.json()).then((data) => {
-      setLoading(false)
-      setNode(data[hash])
-    })
+      setNode(data[hash]?.guessOutcomes)
+    }).catch(() => setNode({}))
   }, [mergedOutcome])
 
   function handleAttempt(outcome) {
@@ -42,11 +40,7 @@ function HomePage({ answers }) {
     <Word guess={ 3 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 4 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 5 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
-    <div>{ JSON.stringify(mergedOutcome) }</div>
-    <div>{ regexString }</div>
-    <div>{ regexToHash(regexString) }</div>
-    <div>{ loading ? <p>Loading...</p> : (JSON.stringify(node)) }</div>
-    <div>{ filteredAnswers.join(', ') }</div>
+    <GuessList guesses={ filteredAnswers } outcomes={ node } />
   </div>
 }
 
