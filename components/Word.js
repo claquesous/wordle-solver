@@ -32,10 +32,16 @@ export default function Word({ guess, attempt, onSubmit }) {
     if (outcome.known[newPosition]===deletedLetter) {
       delete outcome.known[newPosition]
       outcome.counts[deletedLetter]--
+      if (outcome.counts[deletedLetter]===0) {
+        delete outcome.counts[deletedLetter]
+      }
     }
     else if (outcome.misplaced[newPosition].includes(deletedLetter)) {
       outcome.misplaced[newPosition].splice(outcome.misplaced[newPosition].indexOf(deletedLetter),1)
       outcome.counts[deletedLetter]--
+      if (outcome.counts[deletedLetter]===0) {
+        delete outcome.counts[deletedLetter]
+      }
     }
     else {
       outcome.missing.splice(outcome.missing.indexOf(deletedLetter),1)
