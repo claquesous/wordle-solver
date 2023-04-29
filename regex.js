@@ -1,8 +1,5 @@
 import crypto from 'crypto';
 
-import { answers } from './answers.js';
-import { answersCache } from './cache.js';
-
 let constructGuessesRegex = function({known, misplaced, counts}) {
 	let knownArray = [".",".",".",".","."];
 	let knownCounts = {};
@@ -24,7 +21,7 @@ let constructGuessesRegex = function({known, misplaced, counts}) {
 	return regex;
 };
 
-let constructAnswersRegex = function({known, misplaced, missing, counts}) {
+let constructAnswersRegex = function({known, misplaced, missing, counts}, answerList) {
 	let knownArray = [".",".",".",".","."];
 	let knownCounts = {};
 	let knownCount = 0;
@@ -70,7 +67,7 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 		let mysteryLetters = misplaced[i].sort().filter((letter) => {
 			const testKnown = [...knownArray];
 			testKnown[i] = `[^${letter}]`;
-			const beforeAnswers = applyRegex(knownArray.join(""));
+			const beforeAnswers = applyRegex(knownArray.join(""), answerList);
 			const afterAnswers = applyRegex(testKnown.join(""), beforeAnswers);
 			if (afterAnswers.length === beforeAnswers.length)
 				return false;
@@ -88,14 +85,14 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 			regex = regex.concat(`(?<=(${letter}.*){${counts[letter]}})`);
 		}
 		if (missing.includes(letter)) {
-			const beforeAnswers = applyRegex(regex);
+			const beforeAnswers = applyRegex(regex, answerList);
 			const afterAnswers = applyRegex(regex.concat(`(?<=([^${letter}].*){${5-counts[letter]}})`), beforeAnswers);
 			if (afterAnswers.length !== beforeAnswers.length)
 				regex = regex.concat(`(?<=([^${letter}].*){${5-counts[letter]}})`);
 		}
 	});
 	if (missing.length > 0 && totalCount <5) {
-		const beforeAnswers = applyRegex(regex);
+		const beforeAnswers = applyRegex(regex, answerList);
 		let filtered = missing.filter((x) => {
 			if (totalCount > 1) {
 				const afterAnswers = applyRegex(regex.concat(`(?<!([${x}].*))`), beforeAnswers);
@@ -110,23 +107,9 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}) {
 	return regex;
 };
 
-let applyRegex = function(regex, answerList = answers) {
+let applyRegex = function(regex, answerList) {
 	const re = new RegExp(regex);
 	return answerList.filter(w => !!w.match(re));
-}
-
-let getMatchingAnswers = async function(regex, answerList = answers) {
-	let matchingAnswers;
-	try {
-		let cachedAnswers = await answersCache.get(regex);
-		matchingAnswers = cachedAnswers.split(",");
-		if (matchingAnswers[0] === '')
-			matchingAnswers = [];
-	} catch (NotFoundError) {
-		matchingAnswers = applyRegex(regex, answerList);
-		await answersCache.put(regex, matchingAnswers);
-	}
-	return matchingAnswers;
 }
 
 const regexToHash = function(regex) {
@@ -135,5 +118,5 @@ const regexToHash = function(regex) {
 	return hash.digest('hex');
 }
 
-export { constructGuessesRegex, constructAnswersRegex, getMatchingAnswers, regexToHash };
+export { constructGuessesRegex, constructAnswersRegex, regexToHash, applyRegex };
 

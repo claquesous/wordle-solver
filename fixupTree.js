@@ -1,7 +1,9 @@
 import fs from 'fs';
 
-import { constructAnswersRegex, getMatchingAnswers, regexToHash } from './regex.js';
+import { constructAnswersRegex, regexToHash } from './regex.js';
+import { getMatchingAnswers } from './cache.js';
 import { processNode, nodeExists } from './node.js';
+import { answers } from './answers.js';
 
 if (!fs.existsSync('./solve')) {
 	console.log("No solve directory");
@@ -22,7 +24,7 @@ let fixupRegex = async function() {
 		for (let i=0; i<keys.length; i++) {
 			let key = keys[i];
 			const node = nodesArray[key];
-			const regex = constructAnswersRegex(node);
+			const regex = constructAnswersRegex(node, answers);
 
 			if (regex !== node.validAnswersRegex) {
 				const hash = regexToHash(regex);

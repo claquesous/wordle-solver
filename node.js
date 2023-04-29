@@ -1,12 +1,14 @@
 import fs from 'fs';
 
+import { answers } from './answers.js';
 import { enumerateOutcomes } from './outcomes.js';
-import { constructGuessesRegex, constructAnswersRegex, getMatchingAnswers, regexToHash } from './regex.js';
+import { constructGuessesRegex, constructAnswersRegex, regexToHash } from './regex.js';
+import { getMatchingAnswers } from './cache.js';
 
 let createNode = function(outcome, guesses) {
 	let node = {...outcome};
 	node.validGuessesRegex = constructGuessesRegex(outcome);
-	node.validAnswersRegex = constructAnswersRegex(outcome);
+	node.validAnswersRegex = constructAnswersRegex(outcome, answers);
 	node.key = regexToHash(node.validAnswersRegex);
 	node.guesses = guesses;
 	let filename = `./solve/${node.key.substr(-5)}.json`;
@@ -50,18 +52,20 @@ let saveNode = function(node) {
 
 let processNode = async function(key, queue = []) {
 	let node = JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
-	const answers = await getMatchingAnswers(node.validAnswersRegex);
-	if (answers.length <= 1) {
+	const remainingAnswers = await getMatchingAnswers(node.validAnswersRegex);
+	if (remainingAnswers.length <= 1) {
 		return;
 	}
 	node.guessOutcomes = {};
-	for (let i=0; i<answers.length; i++) {
-		let guess = answers[i];
+	for (let i=0; i<remainingAnswers.length; i++) {
+		let guess = remainingAnswers[i];
 		node.guessOutcomes[guess] = [];
 		let outcomes = enumerateOutcomes(guess, node);
 		for (let j=0; j<outcomes.length; j++) {
-			let answerRegex = constructAnswersRegex(outcomes[j]);
-			let validAnswers = await getMatchingAnswers(answerRegex, answers);
+			let answerRegex = constructAnswersRegex(outcomes[j], answers);
+			let guessRegex = constructGuessesRegex(outcomes[j]);
+			//let validGuesses = guessesCache[guessRegex] ||= guesses.filter((w) => { return !!w.match(new RegExp(guessRegex))});
+			let validAnswers = await getMatchingAnswers(answerRegex, remainingAnswers);
 			if (validAnswers.length === 0){
 				if (process.env.DEBUG) console.log("no valid answers", answerRegex, outcomes[j]);
 				outcomes.splice(j--, 1);
@@ -69,7 +73,7 @@ let processNode = async function(key, queue = []) {
 			}
 			node.guessOutcomes[guess].push(createNode(outcomes[j], node.guesses+1));
 		}
-		console.log(node.guesses, guess, outcomes.length, `${i+1}/${answers.length}`, queue.length, node.validAnswersRegex, key);
+		console.log(node.guesses, guess, outcomes.length, `${i+1}/${remainingAnswers.length}`, queue.length, node.validAnswersRegex, key);
 		queue.unshift(...node.guessOutcomes[guess]);
 	}
 //	let newOutcomes = Object.values(node.guessOutcomes).flat();
