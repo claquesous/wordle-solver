@@ -48,7 +48,9 @@ export default function Letter({ position, onSetLetter, onSetResult, onBack, cur
   }
 
   function cycleResult(e) {
-    e.preventDefault()
+    if (position !== cursor) {
+      e.preventDefault()
+    }
     if (!!value) {
       const newResult = (result+1)%3
       setResult(newResult)
