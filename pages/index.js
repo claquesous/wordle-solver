@@ -41,6 +41,9 @@ function HomePage({ answers }) {
     <Word guess={ 4 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 5 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <GuessList guesses={ filteredAnswers } outcomes={ node } />
+    <div>{ regexString }</div>
+    <div>{ JSON.stringify(mergedOutcome) }</div>
+    <div>{ regexToHash(regexString) }</div>
   </div>
 }
 
