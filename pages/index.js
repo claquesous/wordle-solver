@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Word from '../components/Word.js'
 import GuessList from '../components/GuessList.js'
+import { FilteredAnswersContext } from '../contexts/FilteredAnswersContext.js'
 import { mergeOutcomes } from '../outcomes.js'
 import { answers } from '../answers.js'
 import { constructAnswersRegex, applyRegex, regexToHash } from '../regex.js'
@@ -42,7 +43,9 @@ function HomePage({ answers }) {
     <Word guess={ 3 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 4 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 5 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
-    <GuessList count={ count } guesses={ filteredAnswers } outcomes={ node } />
+    <FilteredAnswersContext.Provider value={ filteredAnswers }>
+      <GuessList count={ count } guesses={ filteredAnswers } outcomes={ node } />
+    </FilteredAnswersContext.Provider>
     <div>{ regexString }</div>
     <div>{ JSON.stringify(mergedOutcome) }</div>
     <div>{ regexToHash(regexString) }</div>

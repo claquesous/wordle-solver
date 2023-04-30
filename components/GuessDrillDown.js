@@ -7,11 +7,18 @@ export default function GuessDrillDown({guess, count, outcomes = []}) {
 
   useEffect(() => {
     for (const outcome of outcomes) {
-      const file = outcome.substring( outcome.length -5 )
-      fetch(`/solve/${file}.json`).then(res => res.json()).then(fetchedData => {
-        data[outcome] = fetchedData[outcome]
-        setData({...data})
-      }).catch(console.log)
+      if (outcome?.length === 40) {
+        const file = outcome.substring( outcome.length -5 )
+        fetch(`/solve/${file}.json`).then(res => res.json()).then(fetchedData => {
+          data[outcome] = fetchedData[outcome]
+          if (!data[outcome])
+            console.log('found', outcome)
+          setData({...data})
+        }).catch(console.log)
+      } else {
+        // Not clear what causes this
+        debugger
+      }
     }
   }, [expand])
 
@@ -30,7 +37,7 @@ export default function GuessDrillDown({guess, count, outcomes = []}) {
           <GuessList 
             guesses={ Object.keys(data[outcome]?.guessOutcomes || {}) }
             outcomes={ data[outcome] }
-	    count={count+1}
+            count={count+1}
           />
         </li>
       )}
