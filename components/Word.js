@@ -57,6 +57,9 @@ export default function Word({ guess, attempt, onSubmit }) {
         outcome.missing.push(letter)
         delete outcome.known[position]
         outcome.counts[letter]--
+        if (outcome.counts[letter] === 0) {
+          delete outcome.counts[letter]
+        }
         break;
       case 1:
         outcome.misplaced[position].push(letter)
