@@ -16,6 +16,7 @@ function HomePage({ answers }) {
   })
   const regexString = constructAnswersRegex(mergedOutcome, answers)
   const [node, setNode] = useState({})
+  const [count, setCount] = useState(0)
 
   useEffect(() => {
     const hash = regexToHash(regexString)
@@ -31,6 +32,7 @@ function HomePage({ answers }) {
     setMergedOutcome(newOutcome)
     const regexString = constructAnswersRegex(newOutcome, answers)
     setFilteredAnswers(applyRegex(regexString,filteredAnswers))
+    setCount(count+1)
   }
 
   return <div>
@@ -40,7 +42,7 @@ function HomePage({ answers }) {
     <Word guess={ 3 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 4 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 5 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
-    <GuessList guesses={ filteredAnswers } outcomes={ node } />
+    <GuessList count={ count } guesses={ filteredAnswers } outcomes={ node } />
     <div>{ regexString }</div>
     <div>{ JSON.stringify(mergedOutcome) }</div>
     <div>{ regexToHash(regexString) }</div>
