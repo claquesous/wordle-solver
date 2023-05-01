@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import GuessList from './GuessList.js'
 
-export default function GuessDrillDown({guess, count, outcomeKeys = []}) {
+export default function GuessDrillDown({ guess, count, outcomeKeys }) {
   const [expand, setExpand] = useState(false)
   const [data, setData] = useState({})
 
@@ -11,13 +11,12 @@ export default function GuessDrillDown({guess, count, outcomeKeys = []}) {
         const file = outcome.substring( outcome.length -5 )
         fetch(`/solve/${file}.json`).then(res => res.json()).then(fetchedData => {
           data[outcome] = fetchedData[outcome]
-          if (!data[outcome])
-            console.log('found', outcome)
-          setData({...data})
+          if (!!data[outcome]) {
+            if (!!data[outcome].guessOutcomes)
+              console.log('found', outcome, data[outcome])
+            setData({...data})
+          }
         }).catch(console.log)
-      } else {
-        // Not clear what causes this
-        debugger
       }
     }
   }, [expand])
@@ -35,9 +34,9 @@ export default function GuessDrillDown({guess, count, outcomeKeys = []}) {
       {outcomeKeys.map(outcome =>
         <li key={ outcome }>{ outcome }
           <GuessList 
-            guesses={ Object.keys(data[outcome]?.guessOutcomes || []) }
-            outcome={ data[outcome] }
-            count={count+1}
+            guesses={ Object.keys(data[outcome]?.guessOutcomes || {}) }
+            outcome={ data[outcome] || {} }
+            count={ count+1 }
           />
         </li>
       )}

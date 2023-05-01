@@ -4,7 +4,7 @@ import GuessDrillDown from './GuessDrillDown.js'
 import { FilteredAnswersContext } from '../contexts/FilteredAnswersContext.js'
 import { applyRegex } from '../regex.js'
 
-export default function GuessList({guesses, count, outcome = {}}) {
+export default function GuessList({ guesses, count, outcome }) {
   const [collapsed, setCollapsed] = useState(true)
   const filteredAnswers = useContext(FilteredAnswersContext)
   const [ filteredGuesses, setFilteredGuesses ] = useState(guesses)
@@ -25,9 +25,10 @@ export default function GuessList({guesses, count, outcome = {}}) {
       <div>{ outcome.validAnswersRegex }</div>
       <ul>
         {filteredGuesses.map(guess =>
-          <GuessDrillDown key={ guess } guess={ guess }
+          <GuessDrillDown key={ guess }
+            guess={ guess }
             count={ count }
-            outcomeKeys={ outcome[guess] } />
+            outcomeKeys={ !!outcome.guessOutcomes ? outcome.guessOutcomes[guess] : [] } />
         )}
       </ul>
     </div>
