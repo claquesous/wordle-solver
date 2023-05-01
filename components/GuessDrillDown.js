@@ -7,17 +7,13 @@ export default function GuessDrillDown({ guess, count, outcomeKeys }) {
 
   useEffect(() => {
     for (const outcome of outcomeKeys) {
-      if (outcome?.length === 40) {
-        const file = outcome.substring( outcome.length -5 )
-        fetch(`/solve/${file}.json`).then(res => res.json()).then(fetchedData => {
-          data[outcome] = fetchedData[outcome]
-          if (!!data[outcome]) {
-            if (!!data[outcome].guessOutcomes)
-              console.log('found', outcome, data[outcome])
-            setData({...data})
-          }
-        }).catch(console.log)
-      }
+      const file = outcome.substring( outcome.length -5 )
+      fetch(`/solve/${file}.json`).then(res => res.json()).then(fetchedData => {
+        data[outcome] = fetchedData[outcome]
+        if (!!data[outcome]) {
+          setData({...data})
+        }
+      }).catch(console.log)
     }
   }, [expand])
 
@@ -29,11 +25,11 @@ export default function GuessDrillDown({ guess, count, outcomeKeys }) {
     return <li>{guess}: not calculated</li>
   }
 
-  return <li><span onClick={ toggleExpand }>{guess}</span>: 
+  return <li><span onClick={ toggleExpand }>{guess}</span>:
     { expand ? (<ul>
       {outcomeKeys.map(outcome =>
         <li key={ outcome }>{ outcome }
-          <GuessList 
+          <GuessList
             guesses={ Object.keys(data[outcome]?.guessOutcomes || {}) }
             outcome={ data[outcome] || {} }
             count={ count+1 }
