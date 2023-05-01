@@ -19,12 +19,16 @@ export default function GuessList({ guesses, count, outcome }) {
     }
   }, [outcome.validAnswersRegex])
 
+  if (guesses.length === 0) {
+    guesses = filteredGuesses
+  }
+
   return (<div>
-    <div onClick={ show }>{`${6-count} guess${count!==5 ? 'es' : ''} remaining and `}{ filteredGuesses.length ? filteredGuesses.length : 'unknown' } possible solutions remain</div>
+    <div onClick={ show }>{`${6-count} guess${count!==5 ? 'es' : ''} remaining and `}{ guesses.length ? guesses.length : 'unknown' } possible solutions remain</div>
     <div className={ collapsed ? styles.hide : '' }>
       <div>{ outcome.validAnswersRegex }</div>
       <ul>
-        {filteredGuesses.map(guess =>
+        {guesses.map(guess =>
           <GuessDrillDown key={ guess }
             guess={ guess }
             count={ count }
