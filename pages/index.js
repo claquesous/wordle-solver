@@ -23,7 +23,7 @@ function HomePage({ answers }) {
     const hash = regexToHash(regexString)
     const file = hash.substring( hash.length -5 )
     fetch(`/solve/${file}.json`).then(res => res.json()).then((data) => {
-      setNode(data[hash])
+      setNode(data[hash] || {})
     }).catch(() => setNode({}))
   }, [mergedOutcome])
 
