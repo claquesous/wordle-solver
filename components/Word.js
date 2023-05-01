@@ -4,6 +4,7 @@ import Letter from './Letter.js'
 export default function Word({ guess, attempt, onSubmit }) {
   const [cursor, setCursor] = useState(null)
   const [word, setWord] = useState([])
+  const [finalized, setFinalized] = useState(false)
   const [outcome, setOutcome] = useState({
     known: [],
     misplaced: [[], [], [], [], []],
@@ -22,7 +23,9 @@ export default function Word({ guess, attempt, onSubmit }) {
     outcome.missing.push(letter)
     setOutcome(outcome)
     setWord(word)
-    setCursor(position+1)
+    if (position !==4) {
+      setCursor(position+1)
+    }
   }
 
   function handleBackspace(position, letter) {
@@ -84,18 +87,27 @@ export default function Word({ guess, attempt, onSubmit }) {
     }
     else if (e.key === 'Enter') {
       if (isValid()) {
+        setFinalized(true)
         onSubmit(outcome)
       }
     }
   }
 
+  const letterProps = {
+        onSetLetter: handleLetter,
+        onBack: handleBackspace,
+        onSetResult: handleResult,
+        cursor,
+        finalized,
+  }
+
   return (
     <div onKeyDown={ handleKeyDown }>
-      <Letter position={ 0 } onSetLetter={ handleLetter } onBack={ handleBackspace } onSetResult={ handleResult } cursor={ cursor } />
-      <Letter position={ 1 } onSetLetter={ handleLetter } onBack={ handleBackspace } onSetResult={ handleResult } cursor={ cursor } />
-      <Letter position={ 2 } onSetLetter={ handleLetter } onBack={ handleBackspace } onSetResult={ handleResult } cursor={ cursor } />
-      <Letter position={ 3 } onSetLetter={ handleLetter } onBack={ handleBackspace } onSetResult={ handleResult } cursor={ cursor } />
-      <Letter position={ 4 } onSetLetter={ handleLetter } onBack={ handleBackspace } onSetResult={ handleResult } cursor={ cursor } />
+      <Letter position={ 0 } { ...letterProps } />
+      <Letter position={ 1 } { ...letterProps } />
+      <Letter position={ 2 } { ...letterProps } />
+      <Letter position={ 3 } { ...letterProps } />
+      <Letter position={ 4 } { ...letterProps } />
     </div>
   )
 }

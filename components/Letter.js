@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './Letter.module.css'
 
-export default function Letter({ position, onSetLetter, onSetResult, onBack, cursor }) {
+export default function Letter({ position, onSetLetter, onSetResult, onBack, cursor, finalized }) {
   const [value, setValue] = useState('')
   const [result, setResult] = useState(0)
 
@@ -48,10 +48,10 @@ export default function Letter({ position, onSetLetter, onSetResult, onBack, cur
   }
 
   function cycleResult(e) {
-    if (position !== cursor) {
+    if (position !== cursor || finalized) {
       e.preventDefault()
     }
-    if (!!value) {
+    if (!!value && !finalized) {
       const newResult = (result+1)%3
       setResult(newResult)
       onSetResult(newResult, value.toLowerCase(), position)
