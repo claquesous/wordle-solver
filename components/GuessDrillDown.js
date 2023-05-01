@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import GuessList from './GuessList.js'
 
-export default function GuessDrillDown({guess, count, outcomes = []}) {
+export default function GuessDrillDown({guess, count, outcomeKeys = []}) {
   const [expand, setExpand] = useState(false)
   const [data, setData] = useState({})
 
   useEffect(() => {
-    for (const outcome of outcomes) {
+    for (const outcome of outcomeKeys) {
       if (outcome?.length === 40) {
         const file = outcome.substring( outcome.length -5 )
         fetch(`/solve/${file}.json`).then(res => res.json()).then(fetchedData => {
@@ -26,22 +26,22 @@ export default function GuessDrillDown({guess, count, outcomes = []}) {
     setExpand(!expand)
   }
 
-  if (outcomes.length === 0) {
+  if (outcomeKeys.length === 0) {
     return <li>{guess}: not calculated</li>
   }
 
   return <li><span onClick={ toggleExpand }>{guess}</span>: 
     { expand ? (<ul>
-      {outcomes.map(outcome =>
+      {outcomeKeys.map(outcome =>
         <li key={ outcome }>{ outcome }
           <GuessList 
-            guesses={ Object.keys(data[outcome]?.guessOutcomes || {}) }
-            outcomes={ data[outcome] }
+            guesses={ Object.keys(data[outcome]?.guessOutcomes || []) }
+            outcome={ data[outcome] }
             count={count+1}
           />
         </li>
       )}
-    </ul>) : `${outcomes.length} possible outcomes` }
+    </ul>) : `${outcomeKeys.length} possible outcomes` }
   </li>
 }
 

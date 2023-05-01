@@ -44,7 +44,7 @@ function HomePage({ answers }) {
     <Word guess={ 4 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 5 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <FilteredAnswersContext.Provider value={ filteredAnswers }>
-      <GuessList count={ count } guesses={ filteredAnswers } outcomes={ node } />
+      <GuessList count={ count } guesses={ filteredAnswers } outcome={ node } />
     </FilteredAnswersContext.Provider>
     <div>{ regexString }</div>
     <div>{ JSON.stringify(mergedOutcome) }</div>
