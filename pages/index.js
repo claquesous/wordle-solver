@@ -36,20 +36,19 @@ function HomePage({ answers }) {
     setCount(count+1)
   }
 
-  return <div>
+  return <>
     <Word guess={ 0 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 1 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 2 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 3 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 4 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
     <Word guess={ 5 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
+    <>{ regexToHash(regexString) }</>
     <FilteredAnswersContext.Provider value={ filteredAnswers }>
       <GuessList count={ count } guesses={ filteredAnswers } outcome={ node } />
     </FilteredAnswersContext.Provider>
-    <div>{ regexString }</div>
-    <div>{ JSON.stringify(mergedOutcome) }</div>
-    <div>{ regexToHash(regexString) }</div>
-  </div>
+    <>{ regexString }</>
+  </>
 }
 
 export async function getStaticProps() {

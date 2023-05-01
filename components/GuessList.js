@@ -23,10 +23,10 @@ export default function GuessList({ guesses, count, outcome }) {
     guesses = filteredGuesses
   }
 
-  return (<div>
+  return (<>
     <div onClick={ show }>{`${6-count} guess${count!==5 ? 'es' : ''} remaining and `}{ guesses.length ? guesses.length : 'unknown' } possible solutions remain</div>
     <div className={ collapsed ? styles.hide : '' }>
-      <div>{ outcome.validAnswersRegex }</div>
+      <>{ outcome.validAnswersRegex }</>
       <ul>
         {guesses.map(guess =>
           <GuessDrillDown key={ guess }
@@ -36,6 +36,6 @@ export default function GuessList({ guesses, count, outcome }) {
         )}
       </ul>
     </div>
-  </div>)
+  </>)
 }
 
