@@ -47,7 +47,6 @@ function HomePage({ answers }) {
     <FilteredAnswersContext.Provider value={ filteredAnswers }>
       <GuessList count={ count } guesses={ filteredAnswers } outcome={ node } />
     </FilteredAnswersContext.Provider>
-    <>{ regexString }</>
   </>
 }
 
