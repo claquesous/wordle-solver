@@ -3,6 +3,7 @@ import GuessList from './GuessList.js'
 
 export default function GuessDrillDown({ guess, count, outcomeKeys }) {
   const [expand, setExpand] = useState(false)
+  const [hasExpanded, setHasExpanded] = useState(false)
   const [data, setData] = useState({})
 
   useEffect(() => {
@@ -15,10 +16,11 @@ export default function GuessDrillDown({ guess, count, outcomeKeys }) {
         }
       }).catch(console.log)
     }
-  }, [expand])
+  }, [hasExpanded])
 
   function toggleExpand() {
     setExpand(!expand)
+    setHasExpanded(true)
   }
 
   if (outcomeKeys.length === 0) {
