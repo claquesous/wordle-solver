@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import GuessList from './GuessList.js'
+import Letter from './Letter.js'
 
 export default function GuessDrillDown({ guess, count, outcomeKeys }) {
   const [expand, setExpand] = useState(false)
@@ -27,10 +28,43 @@ export default function GuessDrillDown({ guess, count, outcomeKeys }) {
     return <li>{guess}: not calculated</li>
   }
 
+  function outcomeWord(key) {
+    const outcome = data[key]
+    if (!outcome) {
+      return
+    }
+    let results = []
+    let counts = {...outcome.counts}
+
+    for (let i=0; i<5; i++) {
+      if (outcome.known[i]===guess[i]) {
+        results[i] = 2
+        counts[guess[i]]--
+      }
+    }
+
+    for (let i=0; i<5; i++) {
+      if (outcome.known[i]===guess[i]) {
+      }
+      else if (!!counts[guess[i]]) {
+        results[i] = 1
+        counts[guess[i]]--
+      }
+    }
+
+    return (<>
+      <Letter letter={ guess[0] } outcome={ results[0] } />
+      <Letter letter={ guess[1] } outcome={ results[1] } />
+      <Letter letter={ guess[2] } outcome={ results[2] } />
+      <Letter letter={ guess[3] } outcome={ results[3] } />
+      <Letter letter={ guess[4] } outcome={ results[4] } />
+    </>)
+  }
+
   return <li><span onClick={ toggleExpand }>{guess}</span>:
     { expand ? (<ul>
       {outcomeKeys.map(outcome =>
-        <li key={ outcome }>{ outcome }
+        <li key={ outcome }> { outcomeWord(outcome) }
           <GuessList
             guesses={ Object.keys(data[outcome]?.guessOutcomes || {}) }
             outcome={ data[outcome] || {} }

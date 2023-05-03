@@ -41,7 +41,6 @@ function HomePage({ answers }) {
     <Word active={ attempt===3 } onSubmit={ handleAttempt } />
     <Word active={ attempt===4 } onSubmit={ handleAttempt } />
     <Word active={ attempt===5 } onSubmit={ handleAttempt } />
-    <>{ regexToHash(regexString) }</>
     <FilteredAnswersContext.Provider value={ filteredAnswers }>
       <GuessList count={ attempt } guesses={ filteredAnswers } outcome={ node } />
     </FilteredAnswersContext.Provider>

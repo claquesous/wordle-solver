@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './Letter.module.css'
 
-export default function Letter({ position, onSetLetter, onSetResult, onBack, current, finalized }) {
-  const [value, setValue] = useState('')
-  const [result, setResult] = useState(0)
+export default function Letter({ position, letter = '', outcome = 0, onSetLetter, onSetResult, onBack, current, finalized }) {
+  const [value, setValue] = useState(letter)
+  const [result, setResult] = useState(outcome)
 
   const cursorReference = useRef(null)
   let currentStyle

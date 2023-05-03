@@ -26,7 +26,6 @@ export default function GuessList({ guesses, count, outcome }) {
   return (<>
     <div onClick={ show }>{`${6-count} guess${count!==5 ? 'es' : ''} remaining and `}{ guesses.length ? guesses.length : 'unknown' } possible solutions remain</div>
     <div className={ collapsed ? styles.hide : '' }>
-      <>{ outcome.validAnswersRegex }</>
       <ul>
         {guesses.map(guess =>
           <GuessDrillDown key={ guess }
