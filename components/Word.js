@@ -18,18 +18,21 @@ export default function Word({ active, onSubmit }) {
     }
   }, [active])
 
-  function handleLetter(position, letter) {
-    word[position] = letter
+  function handleLetter(letter) {
+    word[cursor] = letter
     outcome.missing.push(letter)
     setOutcome(outcome)
     setWord(word)
-    if (position !==4) {
-      setCursor(position+1)
+    if (cursor !==4) {
+      setCursor(cursor+1)
     }
   }
 
-  function handleBackspace(position, letter) {
-    const newPosition = !letter ? position -1 : position
+  function handleBackspace(letter) {
+    if (cursor===0) {
+      return
+    }
+    const newPosition = !letter ? cursor -1 : cursor
     const deletedLetter = word[newPosition]
     delete word[newPosition]
     if (outcome.known[newPosition]===deletedLetter) {
@@ -103,11 +106,11 @@ export default function Word({ active, onSubmit }) {
 
   return (
     <div onKeyDown={ handleKeyDown }>
-      <Letter position={ 0 } { ...letterProps } />
-      <Letter position={ 1 } { ...letterProps } />
-      <Letter position={ 2 } { ...letterProps } />
-      <Letter position={ 3 } { ...letterProps } />
-      <Letter position={ 4 } { ...letterProps } />
+      <Letter position={ 0 } current= { cursor===0 } { ...letterProps } />
+      <Letter position={ 1 } current= { cursor===1 } { ...letterProps } />
+      <Letter position={ 2 } current= { cursor===2 } { ...letterProps } />
+      <Letter position={ 3 } current= { cursor===3 } { ...letterProps } />
+      <Letter position={ 4 } current= { cursor===4 } { ...letterProps } />
     </div>
   )
 }

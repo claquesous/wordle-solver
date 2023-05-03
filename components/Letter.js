@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './Letter.module.css'
 
-export default function Letter({ position, onSetLetter, onSetResult, onBack, cursor, finalized }) {
+export default function Letter({ position, onSetLetter, onSetResult, onBack, current, finalized }) {
   const [value, setValue] = useState('')
   const [result, setResult] = useState(0)
 
@@ -20,19 +20,19 @@ export default function Letter({ position, onSetLetter, onSetResult, onBack, cur
   }
 
   useEffect(() => {
-    if (position === cursor) {
+    if (current) {
       cursorReference.current.focus()
       cursorReference.current.value = ''
       setValue('')
       setResult(0)
     }
-  }, [cursor])
+  }, [current])
 
   function handlePress({ nativeEvent }) {
     const key = nativeEvent.data
     if (key?.match(/[a-zA-Z]/)) {
       setValue(key.toUpperCase())
-      onSetLetter(position, key.toLowerCase())
+      onSetLetter(key.toLowerCase())
     }
     else {
       setValue(value)
@@ -41,14 +41,14 @@ export default function Letter({ position, onSetLetter, onSetResult, onBack, cur
 
   function handleBackspace({ nativeEvent }) {
     if (nativeEvent.key === 'Backspace') {
-      onBack(position, value)
+      onBack(value)
       setValue('')
       setResult(0)
     }
   }
 
   function cycleResult(e) {
-    if (position !== cursor || finalized) {
+    if (!current || finalized) {
       e.preventDefault()
     }
     if (!!value && !finalized) {
