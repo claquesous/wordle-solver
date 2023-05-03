@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Letter from './Letter.js'
 
-export default function Word({ guess, attempt, onSubmit }) {
+export default function Word({ active, onSubmit }) {
   const [cursor, setCursor] = useState(null)
   const [word, setWord] = useState([])
   const [finalized, setFinalized] = useState(false)
@@ -13,10 +13,10 @@ export default function Word({ guess, attempt, onSubmit }) {
   })
 
   useEffect(() => {
-    if (guess === attempt) {
+    if (active) {
       setCursor(0)
     }
-  }, [attempt])
+  }, [active])
 
   function handleLetter(position, letter) {
     word[position] = letter

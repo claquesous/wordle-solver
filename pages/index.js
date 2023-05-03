@@ -17,7 +17,6 @@ function HomePage({ answers }) {
   })
   const regexString = constructAnswersRegex(mergedOutcome, answers)
   const [node, setNode] = useState({})
-  const [count, setCount] = useState(0)
 
   useEffect(() => {
     const hash = regexToHash(regexString)
@@ -33,19 +32,18 @@ function HomePage({ answers }) {
     setMergedOutcome(newOutcome)
     const regexString = constructAnswersRegex(newOutcome, answers)
     setFilteredAnswers(applyRegex(regexString,filteredAnswers))
-    setCount(count+1)
   }
 
   return <>
-    <Word guess={ 0 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
-    <Word guess={ 1 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
-    <Word guess={ 2 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
-    <Word guess={ 3 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
-    <Word guess={ 4 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
-    <Word guess={ 5 } attempt={attempt} onSubmit={ handleAttempt } mergedOutcome={ mergedOutcome } />
+    <Word active={ attempt===0 } onSubmit={ handleAttempt } />
+    <Word active={ attempt===1 } onSubmit={ handleAttempt } />
+    <Word active={ attempt===2 } onSubmit={ handleAttempt } />
+    <Word active={ attempt===3 } onSubmit={ handleAttempt } />
+    <Word active={ attempt===4 } onSubmit={ handleAttempt } />
+    <Word active={ attempt===5 } onSubmit={ handleAttempt } />
     <>{ regexToHash(regexString) }</>
     <FilteredAnswersContext.Provider value={ filteredAnswers }>
-      <GuessList count={ count } guesses={ filteredAnswers } outcome={ node } />
+      <GuessList count={ attempt } guesses={ filteredAnswers } outcome={ node } />
     </FilteredAnswersContext.Provider>
   </>
 }
