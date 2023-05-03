@@ -44,9 +44,7 @@ export default function GuessDrillDown({ guess, count, outcomeKeys }) {
     }
 
     for (let i=0; i<5; i++) {
-      if (outcome.known[i]===guess[i]) {
-      }
-      else if (!!counts[guess[i]]) {
+      if (outcome.known[i]!==guess[i] && !!counts[guess[i]]) {
         results[i] = 1
         counts[guess[i]]--
       }
