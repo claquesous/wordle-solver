@@ -51,11 +51,11 @@ export default function GuessDrillDown({ guess, count, outcomeKeys }) {
     }
 
     return (<>
-      <Letter letter={ guess[0] } outcome={ results[0] } />
-      <Letter letter={ guess[1] } outcome={ results[1] } />
-      <Letter letter={ guess[2] } outcome={ results[2] } />
-      <Letter letter={ guess[3] } outcome={ results[3] } />
-      <Letter letter={ guess[4] } outcome={ results[4] } />
+      <Letter letter={ guess[0] } outcome={ results[0] } finalized={true} />
+      <Letter letter={ guess[1] } outcome={ results[1] } finalized={true} />
+      <Letter letter={ guess[2] } outcome={ results[2] } finalized={true} />
+      <Letter letter={ guess[3] } outcome={ results[3] } finalized={true} />
+      <Letter letter={ guess[4] } outcome={ results[4] } finalized={true} />
     </>)
   }
 
