@@ -53,9 +53,6 @@ let saveNode = function(node) {
 let processNode = async function(key, queue = []) {
 	let node = JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
 	const remainingAnswers = await getMatchingAnswers(node.validAnswersRegex);
-	if (remainingAnswers.length <= 1) {
-		return;
-	}
 	node.guessOutcomes = {};
 	for (let i=0; i<remainingAnswers.length; i++) {
 		let guess = remainingAnswers[i];
