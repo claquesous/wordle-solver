@@ -39,8 +39,8 @@ export default function Letter({ position, letter = '', outcome = 0, onSetLetter
     }
   }
 
-  function handleBackspace({ nativeEvent }) {
-    if (nativeEvent.key === 'Backspace') {
+  function handleBackspace({ key }) {
+    if (key === 'Backspace') {
       onBack(value)
       setValue('')
       setResult(0)
