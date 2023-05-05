@@ -97,11 +97,11 @@ export default function Word({ active, onSubmit }) {
   }
 
   const letterProps = {
-        onSetLetter: handleLetter,
-        onBack: handleBackspace,
-        onSetResult: handleResult,
-        cursor,
-        finalized,
+    onSetLetter: handleLetter,
+    onBack: handleBackspace,
+    onSetResult: handleResult,
+    cursor,
+    finalized,
   }
 
   return (
