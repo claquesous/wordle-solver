@@ -7,7 +7,7 @@ let tritree = [{},{},{},{},{}];
 
 for (let i=0; i<5; i++){
     words.forEach(w => {
-        key = w.substring(0,i) + "_" + w.substring(i+1);
+        let key = w.substring(0,i) + "_" + w.substring(i+1);
         if (!tritree[i][key]) tritree[i][key] = [];
         tritree[i][key] = tritree[i][key].concat(w[i]);
     })
