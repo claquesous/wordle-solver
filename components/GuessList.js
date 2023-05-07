@@ -23,6 +23,10 @@ export default function GuessList({ guesses, count, outcome }) {
     guesses = filteredGuesses
   }
 
+  if (outcome.known && outcome.known.join('').length === 5) {
+    return <div>✓</div>
+  }
+
   return (<>
     <div onClick={ show }>{`${6-count} guess${count!==5 ? 'es' : ''} remaining and `}{ guesses.length ? guesses.length : 'unknown' } possible solutions remain</div>
     <div className={ collapsed ? styles.hide : '' }>
