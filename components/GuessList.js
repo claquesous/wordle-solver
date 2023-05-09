@@ -24,7 +24,7 @@ export default function GuessList({ guesses, count, outcome }) {
   }
 
   if (outcome.known && outcome.known.join('').length === 5) {
-    return <div>✓</div>
+    return <div>{count <=6 ? '✓' : '✗'}</div>
   }
 
   return (<>
