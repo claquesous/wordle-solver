@@ -64,11 +64,14 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
     { hasExpanded ? (<ul className={expand ? '' : styles.hide}>
       {outcomeKeys.map(outcome =>
         <li key={ outcome }> { outcomeWord(outcome) }
+        {data[outcome]?.validAnswersRegex === guess ?
+          <div>{count <=6 ? '✓' : '✗'}</div> :
           <Guesses
             guesses={ Object.keys(data[outcome]?.guessOutcomes || {}) }
             outcome={ data[outcome] || {} }
             count={ count+1 }
           />
+	}
         </li>
       )}
     </ul>) : ''}
