@@ -28,10 +28,12 @@ export default function Guesses({ guesses, count, outcome }) {
     <div className={ collapsed ? styles.hide : '' }>
       <ul>
         {guesses.map(guess =>
-          <Outcomes key={ guess }
-            guess={ guess }
-            count={ count }
-            outcomeKeys={ !!outcome.guessOutcomes ? outcome.guessOutcomes[guess] : [] } />
+	  <li key={ guess }>
+            <Outcomes
+              guess={ guess }
+              count={ count }
+              outcomeKeys={ !!outcome.guessOutcomes ? outcome.guessOutcomes[guess] : [] } />
+          </li>
         )}
       </ul>
     </div>

@@ -26,7 +26,7 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
   }
 
   if (outcomeKeys.length === 0) {
-    return <li>{guess}: not calculated</li>
+    return <>{guess}: not calculated</>
   }
 
   function outcomeWord(key) {
@@ -60,7 +60,7 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
     </>)
   }
 
-  return <li><span onClick={ toggleExpand }>{guess}</span>:
+  return <><span onClick={ toggleExpand }>{guess}</span>:
     { hasExpanded ? (<ul className={expand ? '' : styles.hide}>
       {outcomeKeys.map(outcome =>
         <li key={ outcome }> { outcomeWord(outcome) }
@@ -76,6 +76,6 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
       )}
     </ul>) : ''}
     <span className={expand ? styles.hide : '' }>{`${outcomeKeys.length} possible outcomes`}</span>
-  </li>
+  </>
 }
 
