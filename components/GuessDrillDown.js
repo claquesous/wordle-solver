@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import GuessList from './GuessList.js'
 import Letter from './Letter.js'
+import styles from './GuessList.module.css'
 
 export default function GuessDrillDown({ guess, count, outcomeKeys }) {
   const [expand, setExpand] = useState(false)
@@ -60,7 +61,7 @@ export default function GuessDrillDown({ guess, count, outcomeKeys }) {
   }
 
   return <li><span onClick={ toggleExpand }>{guess}</span>:
-    { expand ? (<ul>
+    { hasExpanded ? (<ul className={expand ? '' : styles.hide}>
       {outcomeKeys.map(outcome =>
         <li key={ outcome }> { outcomeWord(outcome) }
           <GuessList
@@ -70,7 +71,8 @@ export default function GuessDrillDown({ guess, count, outcomeKeys }) {
           />
         </li>
       )}
-    </ul>) : `${outcomeKeys.length} possible outcomes` }
+    </ul>) : ''}
+    <span className={expand ? styles.hide : '' }>{`${outcomeKeys.length} possible outcomes`}</span>
   </li>
 }
 
