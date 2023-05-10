@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react'
-import styles from './GuessList.module.css'
-import GuessDrillDown from './GuessDrillDown.js'
+import styles from './Styles.module.css'
+import Outcomes from './Outcomes.js'
 import { FilteredAnswersContext } from '../contexts/FilteredAnswersContext.js'
 import { applyRegex } from '../regex.js'
 
-export default function GuessList({ guesses, count, outcome }) {
+export default function Guesses({ guesses, count, outcome }) {
   const [collapsed, setCollapsed] = useState(true)
   const filteredAnswers = useContext(FilteredAnswersContext)
   const [ filteredGuesses, setFilteredGuesses ] = useState(guesses)
@@ -32,7 +32,7 @@ export default function GuessList({ guesses, count, outcome }) {
     <div className={ collapsed ? styles.hide : '' }>
       <ul>
         {guesses.map(guess =>
-          <GuessDrillDown key={ guess }
+          <Outcomes key={ guess }
             guess={ guess }
             count={ count }
             outcomeKeys={ !!outcome.guessOutcomes ? outcome.guessOutcomes[guess] : [] } />

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import GuessList from './GuessList.js'
+import Guesses from './Guesses.js'
 import Letter from './Letter.js'
-import styles from './GuessList.module.css'
+import styles from './Styles.module.css'
 
-export default function GuessDrillDown({ guess, count, outcomeKeys }) {
+export default function Outcomes({ guess, count, outcomeKeys }) {
   const [expand, setExpand] = useState(false)
   const [hasExpanded, setHasExpanded] = useState(false)
   const [data, setData] = useState({})
@@ -64,7 +64,7 @@ export default function GuessDrillDown({ guess, count, outcomeKeys }) {
     { hasExpanded ? (<ul className={expand ? '' : styles.hide}>
       {outcomeKeys.map(outcome =>
         <li key={ outcome }> { outcomeWord(outcome) }
-          <GuessList
+          <Guesses
             guesses={ Object.keys(data[outcome]?.guessOutcomes || {}) }
             outcome={ data[outcome] || {} }
             count={ count+1 }

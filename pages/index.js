@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Word from '../components/Word.js'
-import GuessList from '../components/GuessList.js'
+import Guesses from '../components/Guesses.js'
 import { FilteredAnswersContext } from '../contexts/FilteredAnswersContext.js'
 import { mergeOutcomes } from '../outcomes.js'
 import { answers } from '../answers.js'
@@ -42,7 +42,7 @@ function HomePage({ answers }) {
     <Word active={ attempt===4 } onSubmit={ handleAttempt } />
     <Word active={ attempt===5 } onSubmit={ handleAttempt } />
     <FilteredAnswersContext.Provider value={ filteredAnswers }>
-      <GuessList count={ attempt } guesses={ filteredAnswers } outcome={ node } />
+      <Guesses count={ attempt } guesses={ filteredAnswers } outcome={ node } />
     </FilteredAnswersContext.Provider>
   </>
 }
