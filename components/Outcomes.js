@@ -71,7 +71,7 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
             outcome={ data[outcome] || {} }
             count={ count+1 }
           />
-	}
+        }
         </li>
       )}
     </ul>) : ''}

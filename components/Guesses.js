@@ -28,7 +28,7 @@ export default function Guesses({ guesses, count, outcome }) {
     <div className={ collapsed ? styles.hide : '' }>
       <ul>
         {guesses.map(guess =>
-	  <li key={ guess }>
+          <li key={ guess }>
             <Outcomes
               guess={ guess }
               count={ count }
