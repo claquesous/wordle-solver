@@ -61,7 +61,7 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
   }
 
   return <><span onClick={ toggleExpand }>{guess}</span>:
-    { hasExpanded ? (<ul className={expand ? '' : styles.hide}>
+    { hasExpanded ? (<ul className={!expand && styles.hide}>
       {outcomeKeys.map(outcome =>
         <li key={ outcome }> { outcomeWord(outcome) }
         {data[outcome]?.validAnswersRegex === guess ?
@@ -75,7 +75,7 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
         </li>
       )}
     </ul>) : ''}
-    <span className={expand ? styles.hide : '' }>{outcomeKeys.length} possible outcomes</span>
+    <span className={expand && styles.hide }>{outcomeKeys.length} possible outcomes</span>
   </>
 }
 
