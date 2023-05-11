@@ -75,7 +75,7 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
         </li>
       )}
     </ul>) : ''}
-    <span className={expand ? styles.hide : '' }>{`${outcomeKeys.length} possible outcomes`}</span>
+    <span className={expand ? styles.hide : '' }>{outcomeKeys.length} possible outcomes</span>
   </>
 }
 
