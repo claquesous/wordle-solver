@@ -1,0 +1,43 @@
+import { useContext, useEffect, useState } from 'react'
+import styles from './Styles.module.css'
+import Outcomes from './Outcomes.js'
+import { FilteredAnswersContext } from '../contexts/FilteredAnswersContext.js'
+import { applyRegex } from '../regex.js'
+
+export default function Guesses({ guesses, count, outcome }) {
+  const [collapsed, setCollapsed] = useState(true)
+  const filteredAnswers = useContext(FilteredAnswersContext)
+  const [ filteredGuesses, setFilteredGuesses ] = useState(guesses)
+
+  function show() {
+    setCollapsed(!collapsed)
+  }
+
+  useEffect(() => {
+    if (outcome.validAnswersRegex && guesses.length === 0) {
+      setFilteredGuesses(applyRegex(outcome.validAnswersRegex, filteredAnswers))
+    }
+  }, [outcome.validAnswersRegex])
+
+  if (guesses.length === 0) {
+    guesses = filteredGuesses
+  }
+
+  return (<>
+    <div onClick={ show }>{`${6-count} guess${count!==5 && 'es'}`} remaining and { guesses.length || 'unknown' } possible solutions remain</div>
+    <div className={ collapsed ? styles.hide : '' }>
+      <ul>
+        {guesses.map(guess =>
+          <li key={ guess }>
+            <Outcomes
+              guess={ guess }
+              count={ count }
+              outcomeKeys={ !!outcome.guessOutcomes ? outcome.guessOutcomes[guess] : [] }
+            />
+          </li>
+        )}
+      </ul>
+    </div>
+  </>)
+}
+

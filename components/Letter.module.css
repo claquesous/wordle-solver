@@ -1,0 +1,12 @@
+.missing {
+  background: lightgrey;
+}
+
+.misplaced {
+  background: yellow;
+}
+
+.known {
+  background: limegreen;
+}
+

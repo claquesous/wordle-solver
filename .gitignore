@@ -3,4 +3,5 @@ package-lock.json
 answerscache
 processedcache
 solve
+.next
 
