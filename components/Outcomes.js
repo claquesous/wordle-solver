@@ -9,6 +9,9 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
   const [data, setData] = useState({})
 
   useEffect(() => {
+    if (!hasExpanded) {
+      return
+    }
     for (const outcome of outcomeKeys) {
       const file = outcome.substring( outcome.length -5 )
       fetch(`/solve/${file}.json`).then(res => res.json()).then(fetchedData => {
