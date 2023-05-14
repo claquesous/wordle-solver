@@ -20,9 +20,8 @@ function HomePage({ answers }) {
 
   useEffect(() => {
     const hash = regexToHash(regexString)
-    const file = hash.substring( hash.length -5 )
-    fetch(`/solve/${file}.json`).then(res => res.json()).then((data) => {
-      setNode(data[hash] || {})
+    fetch(`/api/node/${hash}`).then(res => res.json()).then((data) => {
+      setNode(data || {})
     }).catch(() => setNode({}))
   }, [mergedOutcome])
 

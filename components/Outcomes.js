@@ -13,9 +13,8 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
       return
     }
     for (const outcome of outcomeKeys) {
-      const file = outcome.substring( outcome.length -5 )
-      fetch(`/solve/${file}.json`).then(res => res.json()).then(fetchedData => {
-        data[outcome] = fetchedData[outcome]
+      fetch(`/api/node/${outcome}`).then(res => res.json()).then(fetchedData => {
+        data[outcome] = fetchedData
         if (!!data[outcome]) {
           setData({...data})
         }
