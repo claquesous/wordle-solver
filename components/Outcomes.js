@@ -68,7 +68,7 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
       {outcomeKeys.map(outcome =>
         <li key={ outcome }> { outcomeWord(outcome) }
         {data[outcome]?.validAnswersRegex === guess ?
-          <div>{count <=6 ? '✓' : '✗'}</div> :
+          <div>{count <6 ? '✓' : '✗'}</div> :
           <Guesses
             guesses={ Object.keys(data[outcome]?.guessOutcomes || {}) }
             outcome={ data[outcome] || {} }
