@@ -1,0 +1,23 @@
+.hide {
+  display: none;
+}
+
+.collapsible::before {
+  content: ' ';
+  display: inline-block;
+
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid currentColor;
+
+  vertical-align: middle;
+  margin-right: .4rem;
+  transform: translateY(-2px);
+
+  transition: transform .2s ease-out;
+}
+
+.opened::before {
+  transform: rotate(90deg) translateX(-3px);
+}
+

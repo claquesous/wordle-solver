@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react'
-import styles from './Styles.module.css'
 import Outcomes from './Outcomes.js'
 import { FilteredAnswersContext } from '../contexts/FilteredAnswersContext.js'
 import { applyRegex } from '../regex.js'
@@ -24,8 +23,11 @@ export default function Guesses({ guesses, count, outcome }) {
   }
 
   return (<>
-    <div onClick={ show }>{`${6-count} guess${count===5 ? '' : 'es'}`} remaining and { guesses.length || 'unknown' } possible solutions remain</div>
-    <div className={ collapsed ? styles.hide : '' }>
+    <div onClick={ show }
+      className={`collapsible ${collapsed ? '' : 'opened'}`} >
+      {`${6-count} guess${count===5 ? '' : 'es'}`} remaining and { guesses.length || 'unknown' } possible solutions remain
+    </div>
+    <div className={ collapsed ? 'hide' : '' }>
       <ul>
         {guesses.map(guess =>
           <li key={ guess }>

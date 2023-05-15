@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import Guesses from './Guesses.js'
 import Letter from './Letter.js'
-import styles from './Styles.module.css'
 
 export default function Outcomes({ guess, count, outcomeKeys }) {
   const [expand, setExpand] = useState(false)
@@ -63,8 +62,9 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
     </>)
   }
 
-  return <><span onClick={ toggleExpand }>{guess}</span>:
-    { hasExpanded ? (<ul className={!expand ? styles.hide : ''}>
+  return <><span onClick={ toggleExpand }>{guess} </span>
+    <span className={`collapsible ${expand ? 'opened' : ''}`} />
+    { hasExpanded ? (<ul className={!expand ? 'hide' : '' }>
       {outcomeKeys.map(outcome =>
         <li key={ outcome }> { outcomeWord(outcome) }
         {data[outcome]?.validAnswersRegex === guess ?
@@ -78,7 +78,7 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
         </li>
       )}
     </ul>) : ''}
-    <span className={expand ? styles.hide : '' }>{outcomeKeys.length} possible outcomes</span>
+    <span className={expand ? 'hide' : ''}>{outcomeKeys.length} possible outcomes</span>
   </>
 }
 
