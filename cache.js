@@ -7,17 +7,17 @@ let answersCache = level("./answerscache");
 let processedCache = level("./processedcache");
 
 let getMatchingAnswers = async function(regex, answerList = answers) {
-	let matchingAnswers;
-	try {
-		let cachedAnswers = await answersCache.get(regex);
-		matchingAnswers = cachedAnswers.split(",");
-		if (matchingAnswers[0] === '')
-			matchingAnswers = [];
-	} catch (NotFoundError) {
-		matchingAnswers = applyRegex(regex, answerList);
-		await answersCache.put(regex, matchingAnswers);
-	}
-	return matchingAnswers;
+  let matchingAnswers;
+  try {
+    let cachedAnswers = await answersCache.get(regex);
+    matchingAnswers = cachedAnswers.split(",");
+    if (matchingAnswers[0] === '')
+      matchingAnswers = [];
+  } catch (NotFoundError) {
+    matchingAnswers = applyRegex(regex, answerList);
+    await answersCache.put(regex, matchingAnswers);
+  }
+  return matchingAnswers;
 }
 
 export { answersCache, getMatchingAnswers, processedCache };
