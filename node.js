@@ -49,9 +49,10 @@ let saveNode = function(node) {
 	fs.writeFileSync(filename, string, "utf8");
 }
 
+let loadNode = (key) => JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
 
 let processNode = async function(key, queue = []) {
-	let node = JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
+	let node = loadNode(key);
 	const remainingAnswers = await getMatchingAnswers(node.validAnswersRegex);
 	node.guessOutcomes = {};
 	for (let i=0; i<remainingAnswers.length; i++) {
@@ -79,7 +80,7 @@ let processNode = async function(key, queue = []) {
 }
 
 let nodeHeight = async function(key) {
-	let node = JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
+	let node = loadNode(key);
 
 	const answers = await getMatchingAnswers(node.validAnswersRegex);
 
@@ -109,5 +110,5 @@ let nodeHeight = async function(key) {
 	return minHeight;
 }
 
-export { createNode, processNode, nodeExists, nodeHeight };
+export { createNode, loadNode, processNode, nodeExists, nodeHeight };
 
