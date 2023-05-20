@@ -10,8 +10,10 @@ if (!fs.existsSync('./solve')) {
 }
 
 async function drainQueue() {
+  const initialLength = queue.length;
+  let processedCount = 0;
   while (queue.length > 0) {
-    let key = queue.shift();
+    const key = process.env.MODE === 'bfs' ? queue.pop() : queue.shift();
     try {
       let cached = await processedCache.get(key);
     } catch (NotFoundError) {
@@ -19,17 +21,27 @@ async function drainQueue() {
       await processedCache.put(key, true);
       await processedCache.put("queue", queue);
     }
-
+    if (process.env.MODE === 'bfs') {
+      processedCount++;
+      if (processedCount%1000 === 0) {
+        console.log('Processed: ', processedCount, '/', initialLength);
+      }
+      if (processedCount === initialLength) {
+        break;
+      }
+    }
   }
   console.log("done");
-  await processedCache.clear(async (error) => {
-    if (error) {
-      console.log('processed clear error', error);
-      return;
-    }
-    else
-      console.log("cleared process queue");
-  });
+  if (process.env.CLEAN && process.env.MODE !== 'bfs') {
+    await processedCache.clear(async (error) => {
+      if (error) {
+        console.log('processed clear error', error);
+        return;
+      }
+      else
+        console.log("cleared process queue");
+    });
+  }
 }
 
 processedCache.get("queue", async (error, cachedQueue) => {
