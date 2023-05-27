@@ -18,8 +18,8 @@ async function drainQueue() {
       let cached = await processedCache.get(key);
     } catch (NotFoundError) {
       await processNode(key, queue);
-      await processedCache.put(key, true);
       await processedCache.put("queue", queue);
+      await processedCache.put(key, true);
     }
     if (process.env.MODE === 'bfs') {
       processedCount++;
