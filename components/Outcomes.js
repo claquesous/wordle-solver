@@ -32,7 +32,7 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
 
   function outcomeWord(key) {
     const outcome = data[key]
-    if (!outcome) {
+    if (!outcome || Object.keys(outcome).length === 0) {
       return
     }
     let results = []
