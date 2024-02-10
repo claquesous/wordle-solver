@@ -4,6 +4,7 @@ import styles from './Letter.module.css'
 export default function Letter({ position, letter = '', outcome = 0, onSetLetter, onSetResult, onBack, current, finalized }) {
   const [value, setValue] = useState(letter)
   const [result, setResult] = useState(outcome)
+  const [tabIndex, setTabIndex] = useState(-1)
 
   const cursorReference = useRef(null)
   let currentStyle
@@ -25,6 +26,7 @@ export default function Letter({ position, letter = '', outcome = 0, onSetLetter
       cursorReference.current.value = ''
       setValue('')
       setResult(0)
+      setTabIndex(0)
     }
   }, [current])
 
@@ -66,6 +68,7 @@ export default function Letter({ position, letter = '', outcome = 0, onSetLetter
         onChange={handlePress}
         onKeyDown={handleBackspace}
         onMouseDown={cycleResult}
+        tabIndex={tabIndex}
         ref={cursorReference}
       />
   )
