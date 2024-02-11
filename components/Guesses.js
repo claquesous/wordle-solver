@@ -22,6 +22,12 @@ export default function Guesses({ guesses, count, outcome }) {
     guesses = filteredGuesses
   }
 
+  function sortGuesses(word1, word2) {
+    return !!outcome.guessOutcomes &&
+      outcome.guessOutcomes[word1] && outcome.guessOutcomes[word2] ?
+      outcome.guessOutcomes[word2].length - outcome.guessOutcomes[word1].length : 0
+  }
+
   return (<>
     <div onClick={ show }
       className={`collapsible ${collapsed ? '' : 'opened'}`} >
@@ -29,7 +35,7 @@ export default function Guesses({ guesses, count, outcome }) {
     </div>
     <div className={ collapsed ? 'hide' : '' }>
       <ul>
-        {guesses.map(guess =>
+        {guesses.sort(sortGuesses).map(guess =>
           <li key={ guess }>
             <Outcomes
               guess={ guess }
