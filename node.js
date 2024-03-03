@@ -3,7 +3,7 @@ import fs from 'fs';
 import { answers } from './answers.js';
 import { enumerateOutcomes } from './outcomes.js';
 import { constructGuessesRegex, constructAnswersRegex, regexToHash } from './regex.js';
-import { getMatchingAnswers } from './cache.js';
+import { getMatchingAnswers, clearMatchingAnswers } from './cache.js';
 
 let createNode = function(outcome, guesses) {
   let node = {...outcome};
@@ -51,8 +51,11 @@ let saveNode = function(node) {
 
 let loadNode = (key) => JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
 
-let processNode = async function(key, queue = []) {
+let processNode = async function(key, queue = [], bustCache = false) {
   let node = loadNode(key);
+  if (bustCache) {
+    clearMatchingAnswers(node.validAnswersRegex);
+  }
   const remainingAnswers = await getMatchingAnswers(node.validAnswersRegex);
   node.guessOutcomes = {};
   for (let i=0; i<remainingAnswers.length; i++) {

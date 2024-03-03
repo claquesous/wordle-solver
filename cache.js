@@ -20,5 +20,9 @@ let getMatchingAnswers = async function(regex, answerList = answers) {
   return matchingAnswers;
 }
 
-export { answersCache, getMatchingAnswers, processedCache };
+let clearMatchingAnswers = async function(regex) {
+  await answersCache.del(regex);
+}
+
+export { answersCache, getMatchingAnswers, clearMatchingAnswers, processedCache };
 

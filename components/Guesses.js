@@ -41,6 +41,7 @@ export default function Guesses({ guesses, count, outcome }) {
               guess={ guess }
               count={ count }
               outcomeKeys={ !!outcome.guessOutcomes ? outcome.guessOutcomes[guess] : [] }
+              root={outcome.key}
             />
           </li>
         )}

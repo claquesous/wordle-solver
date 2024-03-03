@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Guesses from './Guesses.js'
 import Letter from './Letter.js'
 
-export default function Outcomes({ guess, count, outcomeKeys }) {
+export default function Outcomes({ guess, count, outcomeKeys, root }) {
   const [expand, setExpand] = useState(false)
   const [hasExpanded, setHasExpanded] = useState(false)
   const [data, setData] = useState({})
@@ -24,6 +24,10 @@ export default function Outcomes({ guess, count, outcomeKeys }) {
   function toggleExpand() {
     setExpand(!expand)
     setHasExpanded(true)
+  }
+
+  if (!outcomeKeys) {
+    console.error(root)
   }
 
   if (outcomeKeys.length === 0) {
