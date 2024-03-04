@@ -1,22 +1,22 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './Letter.module.css'
 
-export default function Letter({ position, letter = '', outcome = 0, onSetLetter, onSetResult, onBack, current, finalized }) {
+export default function Letter({ position, letter = '', outcome = 0, onSetLetter, onSetResult, onBack, current, finalized, small }) {
   const [value, setValue] = useState(letter)
   const [result, setResult] = useState(outcome)
   const [tabIndex, setTabIndex] = useState(-1)
 
   const cursorReference = useRef(null)
-  let currentStyle
+  let currentStyle = small ? styles.small + ' ' : ''
   switch(result) {
     case 0:
-      currentStyle = styles.missing
+      currentStyle += styles.missing
       break
     case 1:
-      currentStyle = styles.misplaced
+      currentStyle += styles.misplaced
       break
     case 2:
-      currentStyle = styles.known
+      currentStyle += styles.known
       break
   }
 
@@ -33,7 +33,7 @@ export default function Letter({ position, letter = '', outcome = 0, onSetLetter
   function handlePress({ nativeEvent }) {
     const key = nativeEvent.data
     if (key?.match(/[a-zA-Z]/)) {
-      setValue(key.toUpperCase())
+      setValue(key)
       onSetLetter(key.toLowerCase())
     }
     else {

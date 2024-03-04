@@ -5,6 +5,7 @@ input {
   text-align: center;
   aspect-ratio: 1/1;
   margin: .1rem;
+  text-transform: uppercase;
 }
 
 body {

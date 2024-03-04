@@ -10,3 +10,9 @@
   background: limegreen;
 }
 
+.small {
+  width: 2rem;
+  font-size: large;
+  margin: 1px;
+}
+
