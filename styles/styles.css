@@ -1,8 +1,10 @@
 input {
-  width: 20px;
+  width: 3rem;
   caret-color: transparent;
-  font-size: larger;
+  font-size: xx-large;
   text-align: center;
+  aspect-ratio: 1/1;
+  margin: .1rem;
 }
 
 body {
