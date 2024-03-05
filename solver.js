@@ -9,30 +9,38 @@ if (!fs.existsSync('./solve')) {
   fs.mkdirSync('./solve');
 }
 
+const doBfs = () => ['bfs','drain'].includes(process.env.MODE);
+
 async function drainQueue() {
   const initialLength = queue.length;
   let processedCount = 0;
   while (queue.length > 0) {
-    const key = process.env.MODE === 'bfs' ? queue.pop() : queue.shift();
+    const key = doBfs() ? queue.pop() : queue.shift();
     try {
       let cached = await processedCache.get(key);
     } catch (NotFoundError) {
-      await processNode(key, queue);
-      await processedCache.put("queue", queue);
-      await processedCache.put(key, true);
+      if (process.env.MODE==='drain') {
+        queue.unshift(key);
+      } else {
+        await processNode(key, queue);
+        await processedCache.put("queue", queue);
+        await processedCache.put(key, true);
+      }
     }
-    if (process.env.MODE === 'bfs') {
+    if (doBfs()) {
       processedCount++;
       if (processedCount%1000 === 0) {
-        console.log('Processed: ', processedCount, '/', initialLength);
+        console.log(`Processed: ${processedCount}/${initialLength} (Now: ${queue.length})`);
+        await processedCache.put("queue", queue);
       }
       if (processedCount === initialLength) {
+        await processedCache.put("queue", queue);
         break;
       }
     }
   }
   console.log("done");
-  if (process.env.CLEAN && process.env.MODE !== 'bfs') {
+  if (process.env.CLEAN && !doBfs()) {
     await processedCache.clear(async (error) => {
       if (error) {
         console.log('processed clear error', error);
