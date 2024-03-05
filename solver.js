@@ -23,22 +23,19 @@ async function drainQueue() {
         queue.unshift(key);
       } else {
         await processNode(key, queue);
-        await processedCache.put("queue", queue);
         await processedCache.put(key, true);
       }
     }
-    if (doBfs()) {
-      processedCount++;
-      if (processedCount%1000 === 0) {
-        console.log(`Processed: ${processedCount}/${initialLength} (Now: ${queue.length})`);
-        await processedCache.put("queue", queue);
-      }
-      if (processedCount === initialLength) {
-        await processedCache.put("queue", queue);
-        break;
-      }
+    processedCount++;
+    if (processedCount%1000 === 0) {
+      console.log(`Processed: ${processedCount}/${initialLength} (Now: ${queue.length})`);
+      await processedCache.put("queue", queue);
+    }
+    if ((doBfs() && processedCount === initialLength)) {
+      break;
     }
   }
+  await processedCache.put("queue", queue);
   console.log("done");
   if (process.env.CLEAN && !doBfs()) {
     await processedCache.clear(async (error) => {
