@@ -58,6 +58,10 @@ let processNode = async function(key, queue = [], bustCache = false) {
   }
   const remainingAnswers = await getMatchingAnswers(node.validAnswersRegex);
   node.guessOutcomes = {};
+  if (!!process.env.MAX_LENGTH && remainingAnswers.length>process.env.MAX_LENGTH) {
+    queue.push(key);
+    return false;
+  }
   for (let i=0; i<remainingAnswers.length; i++) {
     let guess = remainingAnswers[i];
     node.guessOutcomes[guess] = [];
@@ -80,6 +84,7 @@ let processNode = async function(key, queue = [], bustCache = false) {
 //  let newOutcomes = Object.values(node.guessOutcomes).flat();
 //  queue.unshift(...newOutcomes);
   saveNode(node);
+  return true;
 }
 
 let nodeHeight = async function(key) {
