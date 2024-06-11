@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 import { constructAnswersRegex, regexToHash } from './regex.js';
-import { getMatchingAnswers } from './cache.js';
+import { getMatchingAnswers, processedCache } from './cache.js';
 import { processNode, nodeExists } from './node.js';
 import { answers } from './answers.js';
 
@@ -90,8 +90,35 @@ let validateTree = async function() {
   }
 };
 
+let validateProcessed = async function() {
+  const dir = fs.opendirSync("./solve");
+  let queue = [];
+  let totalCount=0;
+  for await (const file of dir) {
+    const nodesArray = JSON.parse(fs.readFileSync(`./solve/${file.name}`));
+    let keys = Object.keys(nodesArray);
+    keys.forEach(async (key) => {
+      let node = nodesArray[key];
+
+      if (!node.guessOutcomes){
+        queue.push(key);
+      } else {
+        await processedCache.put(key, true);
+      }
+    });
+    totalCount++;
+    if (totalCount%1000 === 0) {
+      console.log("Through:", totalCount, queue.length);
+      await processedCache.put("queue", queue);
+    }
+  }
+  await processedCache.put("queue", queue);
+  console.log("done validating processed");
+};
+
 (async () => {
   //await fixupRegex();
-  await validateTree();
+  //await validateTree();
+  await validateProcessed();
 })();
 
