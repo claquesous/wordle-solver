@@ -12,3 +12,20 @@ body {
   font-family: monospace;
 }
 
+@media (min-width: 769px) {
+  .app {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .board, .ngrams {
+    flex-basis: 50%;
+  }
+
+  .guesses {
+    flex-basis: 100%;
+  }
+
+  background-color: green;
+}
+
