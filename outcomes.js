@@ -1,6 +1,4 @@
 let validOutcome = function({known, misplaced, counts}) {
-  const knownCount = known.filter((x) => {return !!x}).length;
-  const minimumMisplacedCount = new Set(misplaced.reduce((arr,x) => {return arr.concat(x)}, [])).size;
   if (Object.keys(counts).reduce((sum,letter) => {return sum+counts[letter];}, 0)>5 ) {
     if (process.env.DEBUG) console.log("too many", known, misplaced);
     return false;
