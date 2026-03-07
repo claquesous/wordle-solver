@@ -2,8 +2,9 @@ import fs from "fs";
 
 import { createNode, processNode } from './node.js';
 import { processedCache } from './cache.js';
+import { Deque } from './deque.js';
 
-let queue = [];
+let queue = new Deque();
 
 if (!fs.existsSync('./solve')) {
   fs.mkdirSync('./solve');
@@ -82,7 +83,7 @@ processedCache.get("queue", async (error, cachedQueue) => {
     });
   }
   else {
-    queue = cachedQueue.split(",");
+    queue = new Deque(cachedQueue.split(","));
     console.log("found previous queue", queue.length);
     await drainQueue();
   }
