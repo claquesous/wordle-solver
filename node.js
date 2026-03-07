@@ -1,9 +1,33 @@
-import fs from 'fs';
+import fs, { promises as fsp } from 'fs';
 
 import { answers } from './answers.js';
 import { enumerateOutcomes } from './outcomes.js';
 import { constructGuessesRegex, constructAnswersRegex, regexToHash } from './regex.js';
 import { getMatchingAnswers, clearMatchingAnswers } from './cache.js';
+
+const shardCache = new Map();
+const dirtyShards = new Set();
+
+function readShard(filename) {
+  if (shardCache.has(filename)) return shardCache.get(filename);
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(filename));
+  } catch {
+    data = {};
+  }
+  shardCache.set(filename, data);
+  return data;
+}
+
+async function flushShards() {
+  const writes = [...dirtyShards].map(filename =>
+    fsp.writeFile(filename, JSON.stringify(shardCache.get(filename)), "utf8")
+  );
+  await Promise.all(writes);
+  dirtyShards.clear();
+  shardCache.clear();
+}
 
 let createNode = function(outcome, guesses) {
   let node = {...outcome};
@@ -12,44 +36,37 @@ let createNode = function(outcome, guesses) {
   node.key = regexToHash(node.validAnswersRegex);
   node.guesses = guesses;
   let filename = `./solve/${node.key.substr(-5)}.json`;
-  try {
-    const existingNode = JSON.parse(fs.readFileSync(filename))[node.key];
-
+  const shard = readShard(filename);
+  const existingNode = shard[node.key];
+  if (existingNode) {
     if (!existingNode.guesses || guesses < existingNode.guesses) {
       existingNode.guesses = guesses;
-      saveNode(existingNode);
+      shard[node.key] = existingNode;
+      dirtyShards.add(filename);
     }
-  } catch (error) {
-    saveNode(node);
+  } else {
+    shard[node.key] = node;
+    dirtyShards.add(filename);
   }
   return node.key;
 }
 
 let nodeExists = function(key) {
   let filename = `./solve/${key.substr(-5)}.json`;
-  let nodes;
-  try {
-    nodes = JSON.parse(fs.readFileSync(filename));
-    return key in nodes;
-  } catch (error) {
-    return false;
-  }
+  return key in readShard(filename);
 }
 
 let saveNode = function(node) {
   let filename = `./solve/${node.key.substr(-5)}.json`;
-  let nodes;
-  try {
-    nodes = JSON.parse(fs.readFileSync(filename));
-  } catch (error) {
-    nodes = {};
-  }
-  nodes[node.key] = node;
-  const string = JSON.stringify(nodes);
-  fs.writeFileSync(filename, string, "utf8");
+  const shard = readShard(filename);
+  shard[node.key] = node;
+  dirtyShards.add(filename);
 }
 
-let loadNode = (key) => JSON.parse(fs.readFileSync(`./solve/${key.substr(-5)}.json`))[key];
+let loadNode = function(key) {
+  let filename = `./solve/${key.substr(-5)}.json`;
+  return readShard(filename)[key];
+}
 
 let processNode = async function(key, queue = [], bustCache = false) {
   let node = loadNode(key);
@@ -84,6 +101,7 @@ let processNode = async function(key, queue = [], bustCache = false) {
 //  let newOutcomes = Object.values(node.guessOutcomes).flat();
 //  queue.unshift(...newOutcomes);
   saveNode(node);
+  await flushShards();
   return true;
 }
 
