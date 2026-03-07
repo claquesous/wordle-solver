@@ -71,11 +71,11 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}, answer
       }
     }
   } while (found);
+  let beforeAnswers = applyRegex(knownArray.join(""), answerList);
   for (let i=0; i<5; i++) {
     let mysteryLetters = misplaced[i].sort().filter((letter) => {
       const testKnown = [...knownArray];
       testKnown[i] = `[^${letter}]`;
-      const beforeAnswers = applyRegex(knownArray.join(""), answerList);
       const afterAnswers = applyRegex(testKnown.join(""), beforeAnswers);
       if (afterAnswers.length === beforeAnswers.length)
         return false;
@@ -83,6 +83,7 @@ let constructAnswersRegex = function({known, misplaced, missing, counts}, answer
     });
     if (!known[i] && (mysteryLetters.length > 0)) {
       knownArray[i] = `[^${mysteryLetters.join("")}]`;
+      beforeAnswers = applyRegex(knownArray.join(""), answerList);
     }
   }
   regex = knownArray.join("");
