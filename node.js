@@ -30,7 +30,7 @@ let nodeExists = function(key) {
   let nodes;
   try {
     nodes = JSON.parse(fs.readFileSync(filename));
-    return Object.keys(nodes).indexOf(key) >= 0;
+    return key in nodes;
   } catch (error) {
     return false;
   }
